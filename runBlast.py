@@ -57,11 +57,11 @@ for i in fasta1.split('>')[1:int(float(secs)) + 1]:
         out_text.append(pd.read_csv(StringIO(out),sep='\t',header=None))
         out_bytes = len(out)
         ###
-        dif = max([i for i in range(1, out_bytes+1,1)]) - out_bytes
+        dif = max([i for i in range(1, out_bytes+10,10)]) - out_bytes
         total_length = int(out_bytes)
         dld += out_bytes
         dl = 0
-        for dat in [i for i in range(1, out_bytes+1,1)]:
+        for dat in [i for i in range(1, out_bytes+10,10)]:
             tim = datetime.now() - xx
             dl = dat - dif
             done = int(30 * dl / total_length)
