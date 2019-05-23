@@ -78,5 +78,6 @@ resultados_blast.to_csv(name, sep = '\t',index = None)
 print('\n\nTiempo: {}'.format(tim).split('.')[0], '(h:m:s)')
 print('\nResultado: ', name, '\n')
 print('Secuencias sin resultados: '+str(len(sin_resultados)))
+os.remove('run.py')
 #for i in sin_resultados:
 #    print(i)
