@@ -82,3 +82,5 @@ os.remove('runBlast.py')
 os.remove('run.py')
 #for i in sin_resultados:
 #    print(i)
+import time
+#wwwww
