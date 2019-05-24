@@ -63,6 +63,12 @@ from PIL import Image
 import webbrowser
 from wordcloud import WordCloud, STOPWORDS
 
+import Orange
+from orangecontrib.bio import go
+
+# definir la ontologia, ubicación del archivo go-basic.obo
+ontology = go.Ontology('datos/go-basic.obo')
+
 code = {200:'The request was processed successfully.',
         400:'Bad request. There is a problem with your input.',
         404:'Not found. The resource you requested doesn’t exist.',
