@@ -63,6 +63,12 @@ from PIL import Image
 import webbrowser
 from wordcloud import WordCloud, STOPWORDS
 
+import Orange
+from orangecontrib.bio import go
+
+# definir la ontologia, ubicación del archivo go-basic.obo
+ontology = go.Ontology('datos/go-basic.obo')
+
 code = {200:'The request was processed successfully.',
         400:'Bad request. There is a problem with your input.',
         404:'Not found. The resource you requested doesn’t exist.',
@@ -136,7 +142,7 @@ def word_cloud(df = DataFrame([]), size = 10):
         plt.subplots(figsize=(size,20))
         plt.imshow(wordcloud, interpolation="bilinear")
         plt.axis("off")
-        plt.show()
+        #plt.show()
 ###
 def GO_DAG(go_terms = [], term = ''):
     if len(go_terms) == 0:
@@ -190,7 +196,7 @@ def venn2_plot(set1, set2, label1, label2,size_label,size_num):
         text.set_fontweight('bold')
     for text in v.subset_labels:
         text.set_fontsize(size_num)
-    plt.show()
+    #plt.show()
 ###
 def venn3_plot(set1 = set(), set2 = set(), set3 = set(), lab_set1 = 'Set1', lab_set2 = 'Set2',
                lab_set3 = 'Set3', size_label = 20, size_vals = 20):
@@ -210,7 +216,7 @@ def venn3_plot(set1 = set(), set2 = set(), set3 = set(), lab_set1 = 'Set1', lab_
             text.set_fontweight('bold')
         for text in v.subset_labels:
             text.set_fontsize(size_vals)
-        plt.show()
+        #plt.show()
 ###
 # Network
 from networkx import path_graph, random_layout
@@ -290,10 +296,10 @@ def net_plot(df = DataFrame([]),label = 'none',diam_nodos = 10, espe_edges = 0.1
     if label == 'label':
         nx.draw_networkx_labels(G,pos,font_size=10,font_weight='bold') # ,font_weight='bold'
         plt.axis('off')
-        plt.show() # display
+        #plt.show() # display
     if label == 'none':
         plt.axis('off')
-        plt.show() # display
+        #plt.show() # display
 ###
 
 ###
@@ -388,7 +394,7 @@ def heatmap_plot(df = DataFrame([]), colors = 'Spectral', label_x = 'GO', label_
         plt.gca().figure.axes[-1].set_ylabel('Interaction degrees\n(Proteins', size= ylabel_size)
         #plt.xticks(rotation=70)
 
-        plt.show()
+        #plt.show()
 ###
 def go_file():
     if os.path.exists('datos/go-basic.obo'):
