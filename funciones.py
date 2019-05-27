@@ -66,16 +66,45 @@ from wordcloud import WordCloud, STOPWORDS
 import Orange
 from orangecontrib.bio import go
 
-# definir la ontologia, ubicación del archivo go-basic.obo
-ontology = go.Ontology('datos/go-basic.obo')
-
 code = {200:'The request was processed successfully.',
         400:'Bad request. There is a problem with your input.',
         404:'Not found. The resource you requested doesn’t exist.',
         410:'Gone. The resource you requested was removed.',
         500:'Internal server error. Most likely a temporary problem, but if the problem persists please contact us.',
         503:'Service not available. The server is being updated, try again later.'}
-#
+###
+if os.path.exists('datos/go-basic.obo'):
+    print('\nYa está descargado el archivo go-basic.obo\n')
+    url = 'http://purl.obolibrary.org/obo/go/go-basic.obo'
+    print(urllib.request.urlopen(url).headers)
+else:
+    # Método 1: urllib.request.urlretrieve('http://purl.obolibrary.org/obo/go.obo', 'datos/go.obo')
+    # Método 2:
+    print('\nDescargando la Ontología: go-basic.obo\n')
+    url = 'http://purl.obolibrary.org/obo/go/go-basic.obo'
+    go_file = 'datos/go-basic.obo'
+    with open(go_file, 'wb') as f:
+        #print ("Downloading %s" % file_name)
+        response = requests.get(url, stream=True)
+        print(code[response.status_code])
+        total_length = response.headers.get('content-length')
+        if total_length is None: # no content length header
+            f.write(response.content)
+        else:
+            dl = 0
+            total_length = int(total_length)
+            for data in response.iter_content(chunk_size=8192):
+                dl += len(data)
+                f.write(data)
+                done = int(40 * dl / total_length)
+                sys.stdout.write("\rDescargando archivo go-basic.obo [%s%s] %s MB" % ('■' * done, ' ' * (40-done), round(dl/1000000,2)), )    
+                sys.stdout.flush()
+    # información de la base de datos
+    print(urllib.request.urlopen(url).headers)
+###
+# definir la ontologia, ubicación del archivo go-basic.obo
+ontology = go.Ontology('datos/go-basic.obo')
+###
 def barras(df = DataFrame([]), column = 1, dim = 111, title = 'Title', row_num = 10, color = '#ff7f0e',
            size_x = 15, size_y = 15, xlabel = 20, size_title = 25, size_bartxt = 12):
     if len(df) == 0:
