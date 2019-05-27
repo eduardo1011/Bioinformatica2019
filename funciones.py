@@ -86,7 +86,7 @@ else:
     with open(go_file, 'wb') as f:
         #print ("Downloading %s" % file_name)
         response = requests.get(url, stream=True)
-        print(code[response.status_code])
+        print(code[response.status_code],'\n')
         total_length = response.headers.get('content-length')
         if total_length is None: # no content length header
             f.write(response.content)
