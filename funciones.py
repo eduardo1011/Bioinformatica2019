@@ -491,7 +491,7 @@ def get_UniProtKB_info2(id_organism = 0):
     if id_organism == 0:
         print('ID de organismo incorrecto')
     else:
-        link = 'https://uniprot.org/uniprot/?query=organism:'+str(id_organism)+'&format=tab&columns=id,entry name,protein names,length,go-id,organism'
+        link = 'https://uniprot.org/uniprot/?query=organism:'+str(id_organism)+'&format=tab&columns=id,entry name,protein names,organism,genes,length,go-id,go,organism-id'
         file_name = 'annotation_'+str(id_organism)
         with open(file_name, 'wb') as f:
             #print ("Downloading %s" % file_name)
@@ -510,7 +510,7 @@ def get_UniProtKB_info2(id_organism = 0):
                     sys.stdout.flush()
         ###
         acc_uniprot_GO_id=pd.read_csv('annotation_'+str(id_organism),sep='\t')
-        names = ['Entry', 'Entry_name', 'Protein_name', 'Length', 'GO', 'Organism']
+        names = ['Entry', 'Entry_name', 'Protein_name', 'Organism', 'Gene', 'Length', 'GO', 'Terms', 'Tax_ID']
         acc_uniprot_GO_id.columns = names
         return acc_uniprot_GO_id
 ###
