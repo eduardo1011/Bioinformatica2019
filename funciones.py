@@ -335,9 +335,15 @@ def net_plot(df = DataFrame([]),label = 'none',diam_nodos = 10, espe_edges = 0.1
 
 ###
 def get_UniProtKB_info1(ids = []):
+    code = {200:'The request was processed successfully.',
+        400:'Bad request. There is a problem with your input.',
+        404:'Not found. The resource you requested doesn’t exist.',
+        410:'Gone. The resource you requested was removed.',
+        500:'Internal server error. Most likely a temporary problem, but if the problem persists please contact us.',
+        503:'Service not available. The server is being updated, try again later.'}
     sets_ids = []
-    for k in range(0, len(ids),250):
-        sets_ids.append(ids[k:k+250])
+    for k in range(0, len(ids),200):
+        sets_ids.append(ids[k:k+200])
     print('Grupos:', len(sets_ids))
     if len(sets_ids) == 0:
         print('Lista vacía')
@@ -346,14 +352,16 @@ def get_UniProtKB_info1(ids = []):
         n = 0
         for i in sets_ids:
             n += 1
-            params = {'from':'ACC','to':'ACC','format':'tab','query': ' '.join(i),'columns':'id,entry name,protein names,length,go-id,organism'}
-            data = urllib.parse.urlencode(params)
-            url = 'https://www.uniprot.org/uploadlists/'
-            response = requests.get(url, data)
+            url = 'https://www.uniprot.org/uniprot/'
+            uu = '%20OR%20id:'.join(i)
+            uu = re.sub('^', '?query=id:',uu)
+            columnas = '&format=tab&columns=id,entry%20name,protein%20names,organism,genes,length,go-id,go,organism-id'
+            new_url = url + uu + columnas
+            response = requests.get(new_url)
             print('Set '+str(n)+' ('+str(len(i))+' IDs):', code[response.status_code])
             respuesta = response.content.decode()
-            names = ['Entry', 'Entry_name', 'Protein_name', 'Length', 'GO', 'Organism']
-            df = pd.read_csv(StringIO(respuesta),sep='\t',header=None).drop(columns = [6]).drop(index = [0])
+            names = ['Entry', 'Entry_name', 'Protein_name', 'Organism', 'Gene', 'Length', 'GO', 'Terms', 'Tax_ID']
+            df = pd.read_csv(StringIO(respuesta),sep='\t')
             df.columns = names
             uniprot.append(df)
         uniprotkb = pd.concat(uniprot).fillna('NA')
