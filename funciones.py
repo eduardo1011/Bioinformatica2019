@@ -172,7 +172,43 @@ def word_cloud(df = DataFrame([]), size = 10):
         plt.axis("off")
         #plt.show()
 ###
-################################ GO_DAG
+def GO_DAG(go_terms = [], term = ''):
+    if len(go_terms) == 0:
+        print('Lista vacía')
+    else:
+        if term == 'none':
+            formato1 = []
+            for i in go_terms:
+                formato = {i:{"title":i, "body":DataFrame(data = {'GO': [i]}).merge(ontologia, on = 'GO', how = 'left').Term[0], "fill":"gold", "font":"black", "border":"black"}}
+                formato1.append(['"'+i+'"', json.dumps(formato[i])])
+            dag = re.sub('}:','},', '{'+':'.join([':'.join(i) for i in formato1])+'}')
+        
+        else:
+            formato1 = []
+            for i in go_terms:
+                if i == term:
+                    formato = {i:{"title":i, "body":DataFrame(data = {'GO': [i]}).merge(ontologia, on = 'GO', how = 'left').Term[0], "fill":"cyan", "font":"black", "border":"black"}}
+                    formato1.append(['"'+i+'"', json.dumps(formato[i])])
+                else:
+                    formato = {i:{"title":i, "body":DataFrame(data = {'GO': [i]}).merge(ontologia, on = 'GO', how = 'left').Term[0], "fill":"gold", "font":"black", "border":"black"}}
+                    formato1.append(['"'+i+'"', json.dumps(formato[i])])
+            dag = re.sub('}:','},', '{'+':'.join([':'.join(i) for i in formato1])+'}')
+        ## codifica una url a partir de formato utf8
+        #import urllib.parse
+        query = dag
+        convert_utf8_to_url = urllib.parse.quote(query)
+        ##
+        formato_png = 'http://amigo.geneontology.org/visualize?term_data='+convert_utf8_to_url+'&term_data_type=json&mode=amigo&inline=false&format=png'
+        formato_svg = 'http://amigo.geneontology.org/visualize?inline=false&mode=amigo&term_data='+convert_utf8_to_url+'&format=svg&term_data_type=json'
+        ## decodifica la url
+        #from urllib.parse import unquote
+        #url = 'http://amigo.geneontology.org/visualize?term_data='+convert_utf8_to_url+'&term_data_type=json&mode=amigo&inline=false&format=png'
+        #unquote(url)
+        #####
+        #import webbrowser
+        #chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
+        #webbrowser.get(chrome_path).open(formato_png)
+        return [dag, formato_png, formato_svg]
 ###
 def venn2_plot(set1, set2, label1, label2,size_label,size_num):
     v = venn2([set1, set2],
