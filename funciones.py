@@ -65,8 +65,6 @@ from wordcloud import WordCloud, STOPWORDS
 import subprocess
 from datetime import datetime
 
-import Orange
-from orangecontrib.bio import go
 
 code = {200:'The request was processed successfully.',
         400:'Bad request. There is a problem with your input.',
@@ -104,8 +102,7 @@ else:
     # información de la base de datos
     print(urllib.request.urlopen(url).headers)
 ###
-# definir la ontologia, ubicación del archivo go-basic.obo
-ontology = go.Ontology('datos/go-basic.obo')
+
 ###
 def barras(df = DataFrame([]), column = 1, dim = 111, title = 'Title', row_num = 10, color = '#ff7f0e',
            size_x = 15, size_y = 15, xlabel = 20, size_title = 25, size_bartxt = 12):
@@ -175,43 +172,7 @@ def word_cloud(df = DataFrame([]), size = 10):
         plt.axis("off")
         #plt.show()
 ###
-def GO_DAG(go_terms = [], term = ''):
-    if len(go_terms) == 0:
-        print('Lista vacía')
-    else:
-        if term == 'none':
-            formato1 = []
-            for i in go_terms:
-                formato = {ontology[i].id:{"title":ontology[i].id, "body":ontology[i].name, "fill":"gold", "font":"black", "border":"black"}}
-                formato1.append(['"'+ontology[i].id+'"', json.dumps(formato[ontology[i].id])])
-            dag = re.sub('}:','},', '{'+':'.join([':'.join(i) for i in formato1])+'}')
-        
-        else:
-            formato1 = []
-            for i in go_terms:
-                if ontology[i].id == term:
-                    formato = {ontology[i].id:{"title":ontology[i].id, "body":ontology[i].name, "fill":"cyan", "font":"black", "border":"black"}}
-                    formato1.append(['"'+ontology[i].id+'"', json.dumps(formato[ontology[i].id])])
-                else:
-                    formato = {ontology[i].id:{"title":ontology[i].id, "body":ontology[i].name, "fill":"gold", "font":"black", "border":"black"}}
-                    formato1.append(['"'+ontology[i].id+'"', json.dumps(formato[ontology[i].id])])
-            dag = re.sub('}:','},', '{'+':'.join([':'.join(i) for i in formato1])+'}')
-        ## codifica una url a partir de formato utf8
-        #import urllib.parse
-        query = dag
-        convert_utf8_to_url = urllib.parse.quote(query)
-        ##
-        formato_png = 'http://amigo.geneontology.org/visualize?term_data='+convert_utf8_to_url+'&term_data_type=json&mode=amigo&inline=false&format=png'
-        formato_svg = 'http://amigo.geneontology.org/visualize?inline=false&mode=amigo&term_data='+convert_utf8_to_url+'&format=svg&term_data_type=json'
-        ## decodifica la url
-        #from urllib.parse import unquote
-        #url = 'http://amigo.geneontology.org/visualize?term_data='+convert_utf8_to_url+'&term_data_type=json&mode=amigo&inline=false&format=png'
-        #unquote(url)
-        #####
-        #import webbrowser
-        #chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
-        #webbrowser.get(chrome_path).open(formato_png)
-        return [dag, formato_png, formato_svg]
+################################ GO_DAG
 ###
 def venn2_plot(set1, set2, label1, label2,size_label,size_num):
     v = venn2([set1, set2],
@@ -453,7 +414,7 @@ def heatmap_plot(df = DataFrame([]), colors = 'Spectral', label_x = 'GO', label_
                 cbar=True, cbar_kws={"shrink": 0.5}, # 'label': '
                 xticklabels= xlab,
                 yticklabels= ylab)
-        plt.gca().figure.axes[-1].set_ylabel('Interaction degrees\n(Proteins', size= ylabel_size)
+        plt.gca().figure.axes[-1].set_ylabel('Interaction degrees\n(Proteins)', size= ylabel_size)
         #plt.xticks(rotation=70)
 
         #plt.show()
