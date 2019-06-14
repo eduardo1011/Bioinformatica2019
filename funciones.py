@@ -108,7 +108,6 @@ else:
 ###
 def go_file():
     if os.path.exists('datos/go-basic.obo'):
-        print('\nYa está descargado el archivo go-basic.obo\n')
         url = 'http://purl.obolibrary.org/obo/go/go-basic.obo'
         #print(urllib.request.urlopen(url).headers)
         with open('datos/go-basic.obo', 'r') as g:
