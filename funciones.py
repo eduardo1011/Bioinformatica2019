@@ -73,6 +73,10 @@ code = {200:'The request was processed successfully.',
         500:'Internal server error. Most likely a temporary problem, but if the problem persists please contact us.',
         503:'Service not available. The server is being updated, try again later.'}
 ###
+asp = {'P':'Biological Process',
+       'F':'Molecular Function',
+       'C':'Cellular Component'}
+###
 if os.path.exists('datos/go-basic.obo'):
     print('\nYa está descargado el archivo go-basic.obo\n')
     url = 'http://purl.obolibrary.org/obo/go/go-basic.obo'
