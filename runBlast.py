@@ -65,7 +65,7 @@ for i in fasta1.split('>')[1:int(float(secs)) + 1]:
             tim = datetime.now() - xx
             dl = dat - dif
             done = int(30 * dl / total_length)
-            sys.stdout.write('\rSecuencia '+str(n)+' | %s | %s [%s%s] Bytes %s' % ('{}'.format(tim).split('.')[0], identifier,'■' * done, ' ' * (30 - done), dl)) 
+            sys.stdout.write('\rSecuencia '+str(n)+' | %s | %s' % ('{}'.format(tim).split('.')[0], identifier)) 
             sys.stdout.flush()
     os.remove(identifier)
     os.remove(identifier+'.txt')
