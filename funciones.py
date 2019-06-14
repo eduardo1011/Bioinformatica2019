@@ -332,7 +332,30 @@ def net_plot(df = DataFrame([]),label = 'none',diam_nodos = 10, espe_edges = 0.1
         plt.axis('off')
         #plt.show() # display
 ###
-
+def get_UniProtKB_info0(ids = []):
+    sets_ids = []
+    for k in range(0, len(ids),250):
+        sets_ids.append(ids[k:k+250])
+    print('Grupos:', len(sets_ids))
+    if len(sets_ids) == 0:
+        print('Lista vacía')
+    else:
+        uniprot = []
+        n = 0
+        for i in sets_ids:
+            n += 1
+            params = {'from':'ACC','to':'ACC','format':'tab','query': ' '.join(i)}
+            data = urllib.parse.urlencode(params)
+            url = 'https://www.uniprot.org/uploadlists/'
+            response = requests.get(url, data)
+            print('Set '+str(n)+' ('+str(len(i))+' IDs):', code[response.status_code])
+            respuesta = response.content.decode()
+            names = ['ACC', 'Entry']
+            df = pd.read_csv(StringIO(respuesta),sep='\t',header=None).drop(index = [0])
+            df.columns = names
+            uniprot.append(df)
+        uniprotkb0 = pd.concat(uniprot).fillna('NA')
+        return uniprotkb0
 ###
 def get_UniProtKB_info1(ids = []):
     code = {200:'The request was processed successfully.',
