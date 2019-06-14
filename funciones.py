@@ -102,7 +102,78 @@ else:
     # información de la base de datos
     print(urllib.request.urlopen(url).headers)
 ###
+def go_file():
+    if os.path.exists('datos/go-basic.obo'):
+        print('\nYa está descargado el archivo go-basic.obo\n')
+        url = 'http://purl.obolibrary.org/obo/go/go-basic.obo'
+        print(urllib.request.urlopen(url).headers)
+        with open('datos/go-basic.obo', 'r') as g:
+            go_obo = g.read()
+        go1 = go_obo.split('[Term]')
+    else:
+        # Método 1: urllib.request.urlretrieve('http://purl.obolibrary.org/obo/go.obo', 'datos/go.obo')
+        # Método 2:
+        url = 'http://purl.obolibrary.org/obo/go/go-basic.obo'
+        go_file = 'datos/go-basic.obo'
+        with open(go_file, 'wb') as f:
+            #print ("Downloading %s" % file_name)
+            response = requests.get(url, stream=True)
+            print(code[response.status_code])
+            total_length = response.headers.get('content-length')
+            if total_length is None: # no content length header
+                f.write(response.content)
+            else:
+                dl = 0
+                total_length = int(total_length)
+                for data in response.iter_content(chunk_size=8192):
+                    dl += len(data)
+                    f.write(data)
+                    done = int(40 * dl / total_length)
+                    sys.stdout.write("\rDescargando archivo go-basic.obo [%s%s] %s MB" % ('■' * done, ' ' * (40-done), round(dl/1000000,2)), )    
+                    sys.stdout.flush()
+        with open('datos/go-basic.obo', 'r') as g:
+            go_obo = g.read()
+            go1 = go_obo.split('[Term]')
+        # información de la base de datos
+        print(urllib.request.urlopen(url).headers)
+    return go1
+###
+ontology_file = go_file()
+aspect = {'biological_process':'P', 'molecular_function':'F', 'cellular_component':'C'}
+items = []
+for i in ontology_file[1:len(ontology_file)]:
+    items.append([i.split('\n')[1].split(': ')[1],
+                 i.split('\n')[2].split(': ')[1],
+                 aspect[i.split('\n')[3].split(': ')[1]]])
+ontologia = DataFrame(items, columns = ['GO', 'Term', 'Aspect'])
+###
+is_a = []
+for i in ontology_file[1:len(ontology_file)]:
+    cero = i.split('\n')[1].split(': ')[1]
+    uno = re.findall('\nis_a: GO:.*!',i)
+    for j in uno:
+        if re.search('GO:\d+', j):
+            is_a.append([cero, re.search('GO:\d+', j).group()])
+        else:
+            continue
+is_a = DataFrame(is_a, columns = ['GO', 'is_a'])
+is_a = pd.merge(is_a.rename(columns={'GO':'go','is_a':'GO'}), ontologia, on = 'GO', how = 'left')
+is_a.columns = ['GO', 'is_a', 'Term','Aspect']
+###
+# boocle para buscar super términos, esto sustituye la instalación de Orange
+def super_terms(terms):
+    terms = [terms] if isinstance(terms, str) else terms
+    uno = set()
+    dos = set(terms)
+    while dos:
+        term = dos.pop()
+        uno.add(term)
+        terminos = set([('is_a',i) for i in pd.DataFrame(data={'GO': [term]}).merge(is_a, on = 'GO', how = 'left').dropna().is_a])
+        dos.update(set(tres for x, tres in terminos) - uno)
+    return uno
 
+#--------------------------------------------------------------------------------------
+###
 ###
 def barras(df = DataFrame([]), column = 1, dim = 111, title = 'Title', row_num = 10, color = '#ff7f0e',
            size_x = 15, size_y = 15, xlabel = 20, size_title = 25, size_bartxt = 12):
@@ -455,41 +526,6 @@ def heatmap_plot(df = DataFrame([]), colors = 'Spectral', label_x = 'GO', label_
 
         #plt.show()
 ###
-def go_file():
-    if os.path.exists('datos/go-basic.obo'):
-        print('\nYa está descargado el archivo go-basic.obo\n')
-        url = 'http://purl.obolibrary.org/obo/go/go-basic.obo'
-        print(urllib.request.urlopen(url).headers)
-        with open('datos/go-basic.obo', 'r') as g:
-            go_obo = g.read()
-        go1 = go_obo.split('[Term]')
-    else:
-        # Método 1: urllib.request.urlretrieve('http://purl.obolibrary.org/obo/go.obo', 'datos/go.obo')
-        # Método 2:
-        url = 'http://purl.obolibrary.org/obo/go/go-basic.obo'
-        go_file = 'datos/go-basic.obo'
-        with open(go_file, 'wb') as f:
-            #print ("Downloading %s" % file_name)
-            response = requests.get(url, stream=True)
-            print(code[response.status_code])
-            total_length = response.headers.get('content-length')
-            if total_length is None: # no content length header
-                f.write(response.content)
-            else:
-                dl = 0
-                total_length = int(total_length)
-                for data in response.iter_content(chunk_size=8192):
-                    dl += len(data)
-                    f.write(data)
-                    done = int(40 * dl / total_length)
-                    sys.stdout.write("\rDescargando archivo go-basic.obo [%s%s] %s MB" % ('■' * done, ' ' * (40-done), round(dl/1000000,2)), )    
-                    sys.stdout.flush()
-        with open('datos/go-basic.obo', 'r') as g:
-            go_obo = g.read()
-            go1 = go_obo.split('[Term]')
-        # información de la base de datos
-        print(urllib.request.urlopen(url).headers)
-    return go1
 
 ###
 def run_Blast_Windows(x_p = '', file = '', db = ''):
