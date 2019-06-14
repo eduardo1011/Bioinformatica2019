@@ -106,7 +106,7 @@ def go_file():
     if os.path.exists('datos/go-basic.obo'):
         print('\nYa está descargado el archivo go-basic.obo\n')
         url = 'http://purl.obolibrary.org/obo/go/go-basic.obo'
-        print(urllib.request.urlopen(url).headers)
+        #print(urllib.request.urlopen(url).headers)
         with open('datos/go-basic.obo', 'r') as g:
             go_obo = g.read()
         go1 = go_obo.split('[Term]')
@@ -135,7 +135,7 @@ def go_file():
             go_obo = g.read()
             go1 = go_obo.split('[Term]')
         # información de la base de datos
-        print(urllib.request.urlopen(url).headers)
+        #print(urllib.request.urlopen(url).headers)
     return go1
 ###
 ontology_file = go_file()
@@ -171,7 +171,33 @@ def super_terms(terms):
         terminos = set([('is_a',i) for i in pd.DataFrame(data={'GO': [term]}).merge(is_a, on = 'GO', how = 'left').dropna().is_a])
         dos.update(set(tres for x, tres in terminos) - uno)
     return uno
-
+###
+def mapping_super_terms(list_gos = []):
+    if len(list_gos) == 0:
+        print('Lista vacía')
+    else:
+        from datetime import datetime 
+        inicio = datetime.now()
+        lista = list_gos
+        maxx = len(lista)
+        print('\nLength:',maxx,'\n')
+        test = []
+        i = 0
+        n = 0
+        while i < maxx:
+            n += 1
+            for data in [lista[i]]:
+                if re.search('GO:\d+', data):
+                    for u in list(super_terms(data)):
+                        test.append([data, u])
+                else:
+                    test.append('NA')
+                sys.stdout.write("\rProcess | "+str(n)+" | "+data+" | ")    
+                sys.stdout.flush()
+            i += 1
+        print('\n\nAnalysis Time: {}'.format(datetime.now() - inicio).split('.')[0],'\n')
+    df1 = DataFrame(test, columns = ['GO', 'is_a']).drop_duplicates()
+    return df1
 #--------------------------------------------------------------------------------------
 ###
 ###
