@@ -505,7 +505,7 @@ def get_UniProtKB_info2(id_organism = 0):
                 for data in response.iter_content(chunk_size=8192):
                     dl += len(data)
                     f.write(data)
-                    done = int(0.25 * dl / total_length)
+                    done = int(0.1 * dl / total_length)
                     sys.stdout.write("\rLoading [%s%s] %s MB" % ('■' * done, ' ' * (5-done), round(dl/1000000,2)), ) 
                     sys.stdout.flush()
         ###
