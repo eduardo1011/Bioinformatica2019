@@ -105,6 +105,7 @@ else:
                 sys.stdout.flush()
     # información de la base de datos
     print('')
+    print('')
     print(urllib.request.urlopen(url).headers)
 ###
 def go_file():
