@@ -104,6 +104,7 @@ else:
                 sys.stdout.write("\rDescargando archivo go-basic.obo [%s%s] %s MB" % ('■' * done, ' ' * (40-done), round(dl/1000000,2)), )    
                 sys.stdout.flush()
     # información de la base de datos
+    print('')
     print(urllib.request.urlopen(url).headers)
 ###
 def go_file():
@@ -194,7 +195,7 @@ def mapping_super_terms(list_gos = []):
                     for u in list(super_terms(data)):
                         test.append([data, u])
                 else:
-                    test.append('NA')
+                    test.append([data,'NA'])
                 sys.stdout.write("\rProcess | "+str(n)+" | "+data+" | ")    
                 sys.stdout.flush()
             i += 1
