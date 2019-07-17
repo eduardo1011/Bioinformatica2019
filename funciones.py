@@ -516,6 +516,62 @@ def get_UniProtKB_info2(id_organism = 0):
         acc_uniprot_GO_id.columns = names
         return acc_uniprot_GO_id
 ###
+def get_UniProtKB_info3(ids = []):
+    sets_ids = []
+    for k in range(0, len(ids),250):
+        sets_ids.append(ids[k:k+250])
+    print('Grupos:', len(sets_ids))
+    if len(sets_ids) == 0:
+        print('Lista vacía')
+    else:
+        uniprot = []
+        n = 0
+        for i in sets_ids:
+            n += 1
+            params = {'from':'ACC','to':'ACC','format':'tab','query': ' '.join(i),
+                     'columns':'id,entry name,protein names,organism,genes,length,go-id,go,organism-id'}
+            data = urllib.parse.urlencode(params)
+            url = 'https://www.uniprot.org/uploadlists/'
+            response = requests.get(url, data)
+            print('Set '+str(n)+' ('+str(len(i))+' IDs):', code[response.status_code])
+            respuesta = response.content.decode()
+            names = ['Entry', 'Entry_name', 'Protein_name', 'Organism', 'Gene', 'Length', 'GO', 'Terms', 'Tax_ID']
+            df = pd.read_csv(StringIO(respuesta),sep='\t',header=None).drop(columns = [9]).drop(index = [0])
+            df.columns = names
+            uniprot.append(df)
+        uniprotkb = pd.concat(uniprot).fillna('NA')
+        return uniprotkb
+###
+import urllib.parse
+import urllib.request
+def get_UniProtKB_info4(ids = []):
+    sets_ids = []
+    for k in range(0, len(ids),250):
+        sets_ids.append(ids[k:k+250])
+    print('Grupos:', len(sets_ids))
+    if len(sets_ids) == 0:
+        print('Lista vacía')
+    else:
+        uniprot = []
+        n = 0
+        for i in sets_ids:
+            n += 1
+            params = {'from':'ACC','to':'ACC','format':'tab','query': ' '.join(i),
+                     'columns':'id,entry name,protein names,organism,genes,length,go-id,go,organism-id'}
+            data = urllib.parse.urlencode(params)
+            data = data.encode('utf-8')
+            url = 'https://www.uniprot.org/uploadlists/'
+            req = urllib.request.Request(url, data)
+            with urllib.request.urlopen(req) as f:
+                response = f.read().decode('utf-8')
+            print('Set '+str(n)+' ('+str(len(i))+' IDs):', code[f.getcode()])
+            names = ['Entry', 'Entry_name', 'Protein_name', 'Organism', 'Gene', 'Length', 'GO', 'Terms', 'Tax_ID']
+            df = pd.read_csv(StringIO(response),sep='\t',header=None).drop(columns = [9]).drop(index = [0])
+            df.columns = names
+            uniprot.append(df)
+        uniprotkb = pd.concat(uniprot).fillna('NA')
+        return uniprotkb
+###
 import seaborn as sns
 def heatmap_plot(df = DataFrame([]), colors = 'Spectral', label_x = 'GO', label_y = 'Term', size_plot = 10, xticks_size = 12, yticks_size = 12, ylabel_size = 18):
     if len(df) == 0:
