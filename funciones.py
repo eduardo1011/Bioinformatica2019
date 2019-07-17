@@ -27,17 +27,21 @@ Funciones, curso bioinformática
 
 8. get_UniProtKB_info2(id_organism = 0)
 
-9. heatmap_plot(df = DataFrame([]), colors = 'Spectral', label_x = 'GO',
+9. get_UniProtKB_info3(ids = [])
+
+10. get_UniProtKB_info4(ids = [])
+
+11. heatmap_plot(df = DataFrame([]), colors = 'Spectral', label_x = 'GO',
             label_y = 'Term', size_plot = 10, xticks_size = 12,
             yticks_size = 12, ylabel_size = 18)
 
-10. go_file()
+12. go_file()
 
-11. run_Blast_Windows(x_p = '', file = '', db = '')
+13. run_Blast_Windows(x_p = '', file = '', db = '')
 
-12. run_Blast_Linux(x_p = '', file = '', db = '')
+14. run_Blast_Linux(x_p = '', file = '', db = '')
 
-13. run_blast_jupyter(x_p = '', file = '', db = '')
+15. run_blast_jupyter(x_p = '', file = '', db = '')
 
 =========================
 
