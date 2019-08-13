@@ -241,8 +241,8 @@ def barras(df = DataFrame([]), column = 1, dim = 111, title = 'Title', row_num =
     else:
         plt.subplot(dim, facecolor= 'white')
         barWidth = 0.9
-        val = max(list(df.iloc[0:row_num,2]))
-        plt.barh(list(df.iloc[0:row_num,column]) ,list(df.iloc[0:row_num,2]),
+        val = max(list(df.iloc[0:row_num,3]))
+        plt.barh(list(df.iloc[0:row_num,column]) ,list(df.iloc[0:row_num,3]),
                  color= color,
                  align='center',
                  height= 0.7,
@@ -255,14 +255,14 @@ def barras(df = DataFrame([]), column = 1, dim = 111, title = 'Title', row_num =
         plt.tick_params(axis="y", color="gray")
         plt.yticks(size = size_y )
         #plt.xticks(size = size_x ,fontweight='bold')
-        if max(list(df.iloc[0:row_num,2])) > 200:
+        if max(list(df.iloc[0:row_num,3])) > 200:
             escala = 50
-        if max(list(df.iloc[0:row_num,2])) < 200:
+        if max(list(df.iloc[0:row_num,3])) < 200:
             escala = 20
         plt.xticks(range(0,val,escala),size=size_x) #fontweight='bold'
         plt.xlabel("Proteins",size= xlabel)
 
-        for j, k in zip(list(df.iloc[0:row_num,2]),range(0,len(list(df.iloc[0:row_num,1])))):
+        for j, k in zip(list(df.iloc[0:row_num,3]),range(0,len(list(df.iloc[0:row_num,1])))):
             plt.text(j+3,k-0.2,j,
                      size=size_bartxt,ha='left',color= 'black')
 ###
