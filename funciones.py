@@ -225,10 +225,10 @@ def mapping_super_terms(list_gos = []):
                         test.append([data, u])
                 else:
                     test.append([data,'NA'])
-                sys.stdout.write("\rProcess | "+str(n)+" | "+data+" | ")    
+                sys.stdout.write("\rSearching super-Terms of | "+str(n)+" | "+data+" | ")    
                 sys.stdout.flush()
             i += 1
-        print('\n\nAnalysis Time: {}'.format(datetime.now() - inicio).split('.')[0],'\n')
+        print('\n\nSearch time: {}'.format(datetime.now() - inicio).split('.')[0],'\n')
     df1 = DataFrame(test, columns = ['GO', 'is_a']).drop_duplicates()
     return df1
 #--------------------------------------------------------------------------------------
