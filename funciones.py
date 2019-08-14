@@ -500,7 +500,7 @@ def net_plot(df = DataFrame([]), layout = 'Spring', label = 'none', column = 0, 
     plt.gca().spines['right'].set_visible(False)
     plt.gca().spines['left'].set_visible(False)
     plt.gca().spines['bottom'].set_visible(False)
-    return print(len(nodos),'Connections')
+    #return print(len(nodos),'Connections')
 ###
 def get_UniProtKB_info0(ids = []):
     sets_ids = []
