@@ -12,7 +12,7 @@ fasta1 = open(xxxxx,'r')
 filename = xxxxx.split('.')[0]
 name = yyyyy+'_'+filename.split('/')[-1]+'.tab'
 #
-print(yyyyy,'-db', zzzzz,'-query', xxxxx,'-evalue','1E-6','-outfmt\n',
+print(yyyyy,'-db', zzzzz,'-query', xxxxx,'-evalue',uuuuu,'-outfmt\n',
 "6 qacc sacc qlen slen length score bitscore evalue pident nident\n \
 mismatch positive gaps gapopen stitle",'-max_target_seqs','10\n',
 '-max_hsps','1','-out', name+'\n')
@@ -40,7 +40,7 @@ for i in fasta1.split('>')[1:int(float(secs)) + 1]:
     save1.write('>'+i)
     save1.close()
     ###
-    blast = subprocess.call([yyyyy,'-db',zzzzz,'-query', identifier,'-evalue','1E-6','-outfmt',
+    blast = subprocess.call([yyyyy,'-db',zzzzz,'-query', identifier,'-evalue',uuuuu,'-outfmt',
                         "6 qacc sacc qlen slen length score bitscore evalue pident nident mismatch positive gaps gapopen stitle",
                         '-max_target_seqs','10','-max_hsps','1','-out', identifier+'.txt'])
     ###
@@ -70,16 +70,18 @@ for i in fasta1.split('>')[1:int(float(secs)) + 1]:
     os.remove(identifier)
     os.remove(identifier+'.txt')
 ###
-resultados_blast = pd.concat(out_text)
-header = ('qacc','Entry','qlen','slen','length','score','bitscore','evalue','pident','nident',
-                  'mismatch','positive','gaps','gapopen','stitle')
-resultados_blast.columns = header
-resultados_blast.to_csv(name, sep = '\t',index = None)
-print('\n\nTiempo: {}'.format(tim).split('.')[0], '(h:m:s)')
-print('\nResultado: ', name, '\n')
-print('Secuencias sin resultados: '+str(len(sin_resultados)))
-os.remove('runBlast.py')
-os.remove('run.py')
+if len(out_text) == 0:
+    resultados_blast = pd.concat(out_text)
+    header = ('qacc','Entry','qlen','slen','length','score','bitscore','evalue','pident','nident',
+                    'mismatch','positive','gaps','gapopen','stitle')
+else:
+    resultados_blast.columns = header
+    resultados_blast.to_csv(name, sep = '\t',index = None)
+    print('\n\nTiempo: {}'.format(tim).split('.')[0], '(h:m:s)')
+    print('\nResultado: ', name, '\n')
+    print('Secuencias sin resultados: '+str(len(sin_resultados)))
+    os.remove('runBlast.py')
+    os.remove('run.py')
 #for i in sin_resultados:
 #    print(i)
 import time
