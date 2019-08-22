@@ -7,6 +7,8 @@ import re
 import os
 
 print('\nCorriendo '+yyyyy+'\n')
+version = subprocess.check_output([yyyyy, '-version'])
+print(version.decode())
 # 
 fasta1 = open(xxxxx,'r')
 filename = xxxxx.split('.')[0]
