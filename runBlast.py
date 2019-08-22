@@ -73,10 +73,11 @@ for i in fasta1.split('>')[1:int(float(secs)) + 1]:
     os.remove(identifier+'.txt')
 ###
 if len(out_text) == 0:
+    print('Secuencias sin resultados: '+str(len(sin_resultados)))
+else:
     resultados_blast = pd.concat(out_text)
     header = ('qacc','Entry','qlen','slen','length','score','bitscore','evalue','pident','nident',
-                    'mismatch','positive','gaps','gapopen','stitle')
-else:
+              'mismatch','positive','gaps','gapopen','stitle')
     resultados_blast.columns = header
     resultados_blast.to_csv(name, sep = '\t',index = None)
     print('\n\nTiempo: {}'.format(tim).split('.')[0], '(h:m:s)')
