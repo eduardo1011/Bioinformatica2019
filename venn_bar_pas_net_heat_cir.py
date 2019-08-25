@@ -373,6 +373,7 @@ def venn2_plot(set1 = set(),
                lab_set1 = 'Set1',
                lab_set2 = 'Set2',
                linewidth = 1,
+               color_line = 'black',
                alpha_sets = 0.5,
                font_sets = False, # False o 'bold'
                size_vals_sets = 12,
@@ -383,7 +384,7 @@ def venn2_plot(set1 = set(),
                font_label = False): # False o 'bold'
     v = venn2(subsets = (set1, set2), set_labels = (lab_set1, lab_set2))
     c = venn2_circles(subsets = (set1, set2),
-                    linestyle='--', linewidth= linewidth, color='black')
+                    linestyle='--', linewidth= linewidth, color=color_line)
     v.get_patch_by_id('10').set_alpha(0)
     partes = ['10', '01', '11']
     partes2 = ['10', '01']
@@ -408,6 +409,7 @@ def venn3_plot(set1 = set(),
                lab_set2 = 'Set2',
                lab_set3 = 'Set3',
                linewidth = 1,
+               color_line = 'black',
                alpha_sets = 0.5,
                font_sets = False, # False o 'bold'
                size_vals_sets = 12,
@@ -418,7 +420,7 @@ def venn3_plot(set1 = set(),
                font_label = False): # False o 'bold'
     v = venn3(subsets = (set1, set2, set3), set_labels = (lab_set1, lab_set2, lab_set3))
     c = venn3_circles(subsets = (set1, set2, set3),
-                      linestyle='--', linewidth = linewidth, color = 'black')
+                      linestyle='--', linewidth = linewidth, color = color_line)
     partes = ['100', '010', '110', '001', '101', '011', '111']
     partes2 = ['100', '010', '110', '001', '101', '011']
     venn_info = [[i, j] for i, j in zip(v.subset_labels, partes)]
