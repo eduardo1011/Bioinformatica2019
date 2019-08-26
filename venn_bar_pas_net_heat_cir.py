@@ -16,7 +16,7 @@ from matplotlib_venn import venn2, venn2_circles
 import json
 from PIL import Image
 import webbrowser
-from wordcloud import WordCloud, STOPWORDS
+#from wordcloud import WordCloud, STOPWORDS
 import subprocess
 from datetime import datetime
 import networkx as nx
