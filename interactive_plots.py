@@ -913,7 +913,7 @@ def dfUniprot_dfGOSlim(dfUniprot = DataFrame([]), dfGOSlim = DataFrame([])):
                 'PIE CHART': (HBox([a1]), HBox([w1, out1])),
                 'NETWORK CHART': (HBox([a2]),HBox([w2, out2])),
                 'HEATMAP':(HBox([a3]),HBox([w3, out3])),
-                'CIRCOS PLOT': (HBox([a4]), HBox([out4, w4]))}
+                'CIRCOS CHART': (HBox([a4]), HBox([out4, w4]))}
     exe = widgets.ToggleButtons(options=list(graficas.keys()),disabled=False,button_style='')
     def ss(exe):
         display(graficas[exe][0], graficas[exe][1])
