@@ -2,4 +2,4 @@
 
 # Visualización interactiva
 
-# <img src="https://raw.githubusercontent.com/eduardo1011/Bioinformatica2019/master/GOSLIM.PNG" width = 100%>
+# <img src="https://raw.githubusercontent.com/eduardo1011/Bioinformatica2019/master/Visualizations.png" width = 100%>
