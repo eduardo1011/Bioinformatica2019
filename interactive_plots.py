@@ -37,7 +37,7 @@ import nxviz as nxv
 #import bar_pas_net_heat_cir
 #from bar_pas_net_heat_cir import *
 
-#modulo = urllib.request.urlretrieve('https://raw.githubusercontent.com/eduardo1011/Bioinformatica2019/master/venn_bar_pas_net_heat_cir.py', 'venn_bar_pas_net_heat_cir.py')
+modulo = urllib.request.urlretrieve('https://raw.githubusercontent.com/eduardo1011/Bioinformatica2019/master/venn_bar_pas_net_heat_cir.py', 'venn_bar_pas_net_heat_cir.py')
 import venn_bar_pas_net_heat_cir
 from venn_bar_pas_net_heat_cir import *
 
