@@ -500,11 +500,13 @@ def dfUniprot_dfGOSlim(dfUniprot = DataFrame([]), dfGOSlim = DataFrame([])):
                          layout=Layout(width='95%', height='25px'))
     q1 = widgets.SelectionSlider(options=escala_uno1,value=0.5,description='center:',disabled=False,
                          layout=Layout(width='95%', height='25px'))
+    r1 = widgets.SelectionSlider(options=[1, 2, 3, 4],value=1,description='box_col:',disabled=False,
+                         layout=Layout(width='95%', height='25px'))
     z1 = widgets.ToggleButton(value=False,description='Save',disabled=False,button_style='',
                              tooltip='Description')
-    w1 = widgets.VBox([g1, p1, q1, n1, b1, c1, d1, f1, e1, o1, z1])
+    w1 = widgets.VBox([g1, p1, r1, q1, n1, b1, c1, d1, f1, e1, o1, z1])
 
-    def box1(a1, b1, c1, d1, e1, f1, g1, n1, o1, p1, q1, z1):
+    def box1(a1, b1, c1, d1, e1, f1, g1, n1, o1, p1, q1, r1, z1):
         #print((a, b, c, d, e, f, g, h))
         frame1 = dfGOSlim[columnas].groupby(['ASPECT']).get_group(a1).drop_duplicates()
         frame2 = DataFrame(frame1[['GO', 'Term','Short_Term', 'Entry']].drop_duplicates().groupby(['GO','Term', 'Short_Term']).Entry.count()).reset_index()
@@ -521,14 +523,15 @@ def dfUniprot_dfGOSlim(dfUniprot = DataFrame([]), dfGOSlim = DataFrame([])):
                size_title = f1,
                color = pie_colors[e1],
                explode = o1,
-               open_center = q1)
+               open_center = q1,
+               box_col = r1)
         if z1 == True:
             import datetime
             plt.savefig('img/Circle_'+a1+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 600, bbox_inches='tight')
         else:
             pass
     out1 = widgets.interactive_output(box1, {'a1':a1, 'b1': b1, 'c1': c1, 'd1':d1, 'e1':e1,
-                                             'f1':f1, 'g1':g1, 'n1':n1, 'o1':o1, 'p1':p1, 'q1':q1, 'z1':z1})
+                                             'f1':f1, 'g1':g1, 'n1':n1, 'o1':o1, 'p1':p1, 'q1':q1, 'r1':r1, 'z1':z1})
 
     #..........................................................................................
     #..........................................................................................
