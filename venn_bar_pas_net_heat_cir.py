@@ -101,7 +101,7 @@ def barras(df = DataFrame([]), column = 1, dim = 111, title = 'Title', row_num =
 def pastel(df = DataFrame([]), column = 0, dim = 111, title = 'Title',
            row_num = 7, angle = 0, legend = 'Box', # lagend options = 'Box' y 'Labels'
            size_text = 10, size_title = 20, color = pie_colors['Set2'],
-           explode = 0, open_center = 0.4):
+           explode = 0, open_center = 0.4, box_col = 1):
     if len(df) < 1:
         print('Data frame sin datos')
     else:
@@ -132,7 +132,7 @@ def pastel(df = DataFrame([]), column = 0, dim = 111, title = 'Title',
                                  colors = color,
                                  explode = explode0, textprops=dict(size = size_text))
         plt.legend(opcion_leyenda[legend][0], bbox_to_anchor= opcion_leyenda[legend][3], loc=2,
-                   borderaxespad=None, fontsize = opcion_leyenda[legend][4])
+                   borderaxespad=None, fontsize = opcion_leyenda[legend][4], ncol= box_col, frameon=False)
         centre_circle = plt.Circle((0,0),open_center,fc='white')
         plt.title(title, y=0.95 + (explo / 2),size=size_title,fontweight='bold')
         plt.gca().add_artist(centre_circle)
