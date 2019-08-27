@@ -275,7 +275,7 @@ def inputs():
 
 
 def RUN(lista = [], GosliM = DataFrame([])):
-    print('■ 4. Runing...')
+    print('■ 3. Runing...')
     uniprotkb = get_UniProtKB_info1(ids = get_UniProtKB_info0(ids = lista).Entry)
     #uniprotkb.to_csv('uniprotkb.tsv', sep = '\t', index = None)
     anotation = []
@@ -342,7 +342,7 @@ def RUN(lista = [], GosliM = DataFrame([])):
     #file_report.write(reporte)
     #file_report.close()
     
-    print('■ 5. Results Visualization')
+    print('■ 4. Results Visualization')
     import datetime
     uniprotkb_mapping = 'uniprotkb_mapping_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.tsv'
     GO_Slim_summarize = 'GO_Slim_summarize_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.tsv'
@@ -885,10 +885,10 @@ def file_goslim(up):
             df = pd.read_csv(file_path, sep = '\t', header = None).dropna()
             df.to_csv('lista_seleccionada.tsv', sep = '\t', index = None)
             ###
-            new_url = 'https://www.uniprot.org/uniprot/?query=id:'+df.iloc[0][0]+'&format=tab&columns=id,organism'
-            respuesta = requests.get(new_url).content.decode()
-            dff = pd.read_csv(StringIO(respuesta),sep='\t')
-            print('■ 2. Organism identified: ',dff.Organism[0])
+            #new_url = 'https://www.uniprot.org/uniprot/?query=id:'+df.iloc[0][0]+'&format=tab&columns=id,organism'
+            #respuesta = requests.get(new_url).content.decode()
+            #dff = pd.read_csv(StringIO(respuesta),sep='\t')
+            #print('■ 2. Organism identified: ',dff.Organism[0])
 salida = widgets.interactive_output(file_goslim, {'up':up})
 ##
 def file_goslim2(gs):
@@ -902,7 +902,7 @@ def file_goslim2(gs):
     slim = slim.merge(ontologia, on = 'GO', how = 'left').dropna()
     slim = slim[slim['Term'].str.contains('biological_process|molecular_function|cellular_component') == False]
     slim.to_csv('goslim_seleccionado.tsv', sep = '\t', index = None)
-    print('■ 3.',gs)
+    print('■ 2.',gs)
 salida2 = widgets.interactive_output(file_goslim2, {'gs':gs})
 ##
 def file_goslim3(run):
