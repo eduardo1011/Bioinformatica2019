@@ -1,3 +1,12 @@
+´´´
+python
+for i in '1_ANOTACION_2019.ipynb', '2_BLAST_ANOTACION_2019.ipynb', 'Automatic_Notebook.ipynb':
+  
+´´´
+
+
+
+
 # Bioinformatica2019
 
 # Visualización interactiva
