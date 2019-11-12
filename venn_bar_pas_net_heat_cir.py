@@ -5,8 +5,13 @@ import urllib.request
 from urllib.request import urlopen
 import re
 from pandas import DataFrame
+import pandas
+version = pandas.__version__
+if float(version[0:4]) >= 0.25:
+    from io import StringIO
+elif float(version[0:4]) < 0.25:
+    from pandas.compat import StringIO
 import pandas as pd
-from pandas.compat import StringIO
 import warnings
 warnings.filterwarnings("ignore")
 import numpy as np
