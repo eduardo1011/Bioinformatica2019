@@ -48,7 +48,7 @@ def run_Blast_Linux(x_p = '', file = '', db = '', ):
         save.close()
         os.system('gnome-terminal -e "python3 run.py"')
 ###
-def run_blast_jupyter(x_p = '', file = '', db = '', evalue = 0.1):
+def run_blast_jupyter(x_p = '', file = '', db = '', evalue = 0.1, max_target_seqs = 0, max_hsps = 0):
     if file == '':
         print('Intentar nuevamente')
     else:
@@ -62,8 +62,8 @@ def run_blast_jupyter(x_p = '', file = '', db = '', evalue = 0.1):
         #
         print(x_p,'-db', db,'-query', file,'-evalue',str(evalue),'-outfmt\n',
         "6 qacc sacc qlen slen length score bitscore evalue pident nident\n",
-        "mismatch positive gaps gapopen stitle",'-max_target_seqs','10\n',
-        '-max_hsps','1','-out', name+'\n')
+        "mismatch positive gaps gapopen stitle",'-max_target_seqs',str(max_target_seqs),'\n',
+        '-max_hsps',str(max_hsps),'-out', name+'\n')
         #
         fasta1 = fasta1.read()
         # 
@@ -90,7 +90,7 @@ def run_blast_jupyter(x_p = '', file = '', db = '', evalue = 0.1):
             ###
             blast = subprocess.call([x_p,'-db',db,'-query', identifier,'-evalue',str(evalue),'-outfmt',
                                 "6 qacc sacc qlen slen length score bitscore evalue pident nident mismatch positive gaps gapopen stitle",
-                                '-max_target_seqs','10','-max_hsps','1','-out', identifier+'.txt'])
+                                '-max_target_seqs',str(max_target_seqs),'-max_hsps',str(max_hsps),'-out', identifier+'.txt'])
             ###
             out = open(identifier+'.txt','r')
             out = out.read()
