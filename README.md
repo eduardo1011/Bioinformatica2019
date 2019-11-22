@@ -7,4 +7,7 @@ Esta bitácora electrónica está diseñada para hacer anotaciones funcionales p
 
 # Visualización interactiva
 
-# <img src="https://raw.githubusercontent.com/eduardo1011/Bioinformatica2019/master/Visualizations.png" width = 100%>
+# <img src="https://raw.githubusercontent.com/eduardo1011/Bioinformatica2019/master/Visualizations.png" width = 100%><br>
+
+# <img src="https://raw.githubusercontent.com/eduardo1011/Bioinformatica2019/master/TAX.png" width = 100%>
+
