@@ -7,9 +7,9 @@ import re
 from pandas import DataFrame
 import pandas
 version = pandas.__version__
-if float(version[0:4]) >= 0.25:
+if float(version[0:2]) >= 0.25:
     from io import StringIO
-elif float(version[0:4]) < 0.25:
+elif float(version[0:2]) < 0.25:
     from pandas.compat import StringIO
 import pandas as pd
 import warnings
