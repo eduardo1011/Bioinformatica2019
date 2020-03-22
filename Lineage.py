@@ -1,16 +1,21 @@
 import datetime
+import re
 from pandas import Series, DataFrame 
-import pandas as pd
-from pandas.compat import StringIO
-import csv
+from pandas import DataFrame
 import pandas
+version = pandas.__version__
+if float(''.join(re.findall('[0-9]{1,3}[.][0-9]{1,3}', version))) >= 0.25:
+    from io import StringIO
+elif float(''.join(re.findall('[0-9]{1,3}[.][0-9]{1,3}', version))) < 0.25:
+    from pandas.compat import StringIO
+import pandas as pd
+import csv
 import pathlib
 from urllib.request import urlopen
 import urllib.request
 import requests
 
 import webbrowser
-import re
 import shutil, os
 import numpy as np
 from time import sleep
