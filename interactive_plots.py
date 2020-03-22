@@ -7,9 +7,9 @@ import re
 from pandas import DataFrame
 import pandas
 version = pandas.__version__
-if float(version[0:2]) >= 0.25:
+if float(''.join(re.findall('[0-9]{1,3}[.][0-9]{1,3}', version))) >= 0.25:
     from io import StringIO
-elif float(version[0:2]) < 0.25:
+elif float(''.join(re.findall('[0-9]{1,3}[.][0-9]{1,3}', version))) < 0.25:
     from pandas.compat import StringIO
 import pandas as pd
 import warnings
