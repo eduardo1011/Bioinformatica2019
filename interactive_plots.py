@@ -94,7 +94,7 @@ else:
     # información de la base de datos
     #print('')
     #print('')
-    #print(urllib.request.urlopen(url).headers)
+    print('\nLast-Modified:', urllib.request.urlopen(url).headers['Last-Modified'])
 ###
 def go_file():
     if os.path.exists('datos/go-basic.obo'):
@@ -128,7 +128,7 @@ def go_file():
             go_obo = g.read()
             go1 = go_obo.split('[Term]')
         # información de la base de datos
-        #print(urllib.request.urlopen(url).headers)
+        print('\nLast-Modified:', urllib.request.urlopen(url).headers['Last-Modified'])
     return go1
 ###
 ontology_file = go_file()
