@@ -413,7 +413,7 @@ def net_plot(df = DataFrame([]), layout = 'Spring', label = 'none', column = 0, 
     #spectral_layout
     #pos=nx.spring_layout(G, k = k_num) # positions for all nodes
     if layouts[layout] == nx.spring_layout:
-        pos=layouts[layout](G, k = k_num)
+        pos=layouts[layout](G, k = k_num, seed=12345)
     else:
         pos=layouts[layout](G)
     #pos=layout(G)
