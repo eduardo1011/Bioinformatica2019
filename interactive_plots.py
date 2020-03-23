@@ -293,6 +293,7 @@ def RUN(lista = [], GosliM = DataFrame([])):
     anotation = DataFrame(anotation, columns = ['Entry', 'GO'])
     anotation = anotation[anotation['GO'].str.contains('NA') == False]
     ontologia = ontology()
+    anotation = anotation.merge(ontologia[['GO']], on = 'GO')
     ###
     slim = GosliM
     is_a = IS_A()
