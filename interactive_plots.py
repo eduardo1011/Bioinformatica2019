@@ -281,8 +281,16 @@ def inputs():
 
 def RUN(lista = [], GosliM = DataFrame([])):
     print('■ 3. Runing...')
-    uniprotkb = get_UniProtKB_info1(ids = get_UniProtKB_info0(ids = lista).Entry)
-    #uniprotkb.to_csv('uniprotkb.tsv', sep = '\t', index = None)
+    if len(list(lista.columns)) == 1:
+        listaa = lista.drop_duplicates()['0'] 
+        ###-----------------------------------------------
+        uniprotkb = get_UniProtKB_info1(ids = get_UniProtKB_info0(ids = listaa).Entry)
+        uniprotkb = uniprotkb.dropna(subset = ['GO'])
+
+    if len(list(lista.columns)) > 1:
+        uniprotkb = lista
+        uniprotkb.columns = ['Entry', 'Entry_name', 'Protein_name', 'Organism', 'Gene', 'Length', 'GO', 'Terms', 'Tax_ID', 'KINGDOM', 'PHYLUM', 'CLASS', 'ORDER', 'FAMILY', 'GENUS', 'SPECIES']
+
     anotation = []
     for index, row in uniprotkb.iterrows():
         for j in row.GO.split('; '):
@@ -324,51 +332,24 @@ def RUN(lista = [], GosliM = DataFrame([])):
     else:
         print('     ***Not applicable for taxonomic classification')
 
-    #print('■ 5. REPORT')
-    #print('     1. Unique Original GO Terms:',GO_Slim['Original GO'].drop_duplicates().count())
-    #print('       • P:', GO_Slim[GO_Slim['Original Aspect'] == 'P']['Original Term'].drop_duplicates().count())
-    #print('       • F:', GO_Slim[GO_Slim['Original Aspect'] == 'F']['Original Term'].drop_duplicates().count())
-    #print('       • C:', GO_Slim[GO_Slim['Original Aspect'] == 'C']['Original Term'].drop_duplicates().count())
-    #print('     2. Unique GO Slim Terms:',GO_Slim.GO.drop_duplicates().count())
-    #print('       • P:', GO_Slim[GO_Slim['Aspect'] == 'P']['Term'].drop_duplicates().count())
-    #print('       • F:', GO_Slim[GO_Slim['Aspect'] == 'F']['Term'].drop_duplicates().count())
-    #print('       • C:', GO_Slim[GO_Slim['Aspect'] == 'C']['Term'].drop_duplicates().count())
-    #print('    3. Unique mapped identifiers (Proteins):',GO_Slim.Entry.drop_duplicates().count())
-    #print('       • P:', GO_Slim[GO_Slim['Aspect'] == 'P'].Entry.drop_duplicates().count())
-    #print('       • F:', GO_Slim[GO_Slim['Aspect'] == 'F'].Entry.drop_duplicates().count())
-    #print('       • C:', GO_Slim[GO_Slim['Aspect'] == 'C'].Entry.drop_duplicates().count())
-    reporte = '     1. Unique Original GO Terms: '+str(GO_Slim['Original GO'].drop_duplicates().count())+'\n'\
-    '       • P: '+str(GO_Slim[GO_Slim['Original Aspect'] == 'P']['Original Term'].drop_duplicates().count())+'\n'\
-    '       • F: '+str(GO_Slim[GO_Slim['Original Aspect'] == 'F']['Original Term'].drop_duplicates().count())+'\n'\
-    '       • C: '+str(GO_Slim[GO_Slim['Original Aspect'] == 'C']['Original Term'].drop_duplicates().count())+'\n'\
-    '     2. Unique GO Slim Terms: '+str(GO_Slim.GO.drop_duplicates().count())+'\n'\
-    '       • P: '+str(GO_Slim[GO_Slim['Aspect'] == 'P']['Term'].drop_duplicates().count())+'\n'\
-    '       • F: '+str(GO_Slim[GO_Slim['Aspect'] == 'F']['Term'].drop_duplicates().count())+'\n'\
-    '       • C: '+str(GO_Slim[GO_Slim['Aspect'] == 'C']['Term'].drop_duplicates().count())+'\n'\
-    '    3. Unique mapped identifiers (Proteins): '+str(GO_Slim.Entry.drop_duplicates().count())+'\n'\
-    '       • P: '+str(GO_Slim[GO_Slim['Aspect'] == 'P'].Entry.drop_duplicates().count())+'\n'\
-    '       • F: '+str(GO_Slim[GO_Slim['Aspect'] == 'F'].Entry.drop_duplicates().count())+'\n'\
-    '       • C: '+str(GO_Slim[GO_Slim['Aspect'] == 'C'].Entry.drop_duplicates().count())
 
-    #ile_report = open('Report.txt', 'w+')
-    #file_report.write(reporte)
-    #file_report.close()
-    
     
     import datetime
     uniprotkb_mapping = 'uniprotkb_mapping_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.tsv'
     print('     ***UniProt file:',uniprotkb_mapping)
     GO_Slim_summarize = 'GO_Slim_summarize_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.tsv'
     print('■ 4. Results Visualization')
+    #---------------
     uniprotkb.to_csv(uniprotkb_mapping, sep = '\t', index = None)
     GO_Slim.to_csv(GO_Slim_summarize, sep = '\t', index = None)
+    #---------------
     return uniprotkb, GO_Slim
 #--------------------------------------------------------------
 
-def outputs():
-    uniprotkb_mapping = pd.read_csv(uniprotkb_mapping, sep = '\t') 
-    GO_Slim_summarize = pd.read_csv(GO_Slim_summarize, sep = '\t')
-    return uniprotkb_mapping, GO_Slim_summarize
+#def outputs():
+#    uniprotkb_mapping = pd.read_csv(uniprotkb_mapping, sep = '\t') 
+#    GO_Slim_summarize = pd.read_csv(GO_Slim_summarize, sep = '\t')
+#    return uniprotkb_mapping, GO_Slim_summarize
 
 #---------------------------------------------------------------
 import networkx as nx
@@ -1066,6 +1047,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 up = widgets.Checkbox(description='Upload file',value=False,disabled=False)
+UP = widgets.Checkbox(description='Upload file (UniProt)',value=False,disabled=False)
 goslim = [re.search('go\w+', i).group() for i in ontology_file[0].split('\n') if re.search(' go\w+', i)]
 gs = widgets.Dropdown(options=goslim,description='GO Slim:',disabled=False,
                     layout=Layout(width='40%', height='25px'))
@@ -1074,26 +1056,47 @@ yyy.style.button_color = 'red'
 xxx = Button(layout=Layout(width='94%', height='5px'), disabled=True)
 xxx.style.button_color = 'white'
 run = widgets.Checkbox(description='Run GO Slim',value=False,disabled=False)
-def file_goslim(up):
-    if up == True:
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes("-topmost", True)
-        file_path = filedialog.askopenfilename()
-        root.destroy()
-        if file_path == '':
-            print('\n!!!!!!! File not found !!!!!!!')
-            sys.exit()
-        else:
-            print('■ 1.',file_path)
-            df = pd.read_csv(file_path, sep = '\t', header = None).dropna()
-            df.to_csv('lista_seleccionada.tsv', sep = '\t', index = None)
-            ###
-            #new_url = 'https://www.uniprot.org/uniprot/?query=id:'+df.iloc[0][0]+'&format=tab&columns=id,organism'
-            #respuesta = requests.get(new_url).content.decode()
-            #dff = pd.read_csv(StringIO(respuesta),sep='\t')
-            #print('■ 2. Organism identified: ',dff.Organism[0])
-salida = widgets.interactive_output(file_goslim, {'up':up})
+def file_goslim(up, UP):
+    if up == UP:
+        print('\33[1m\33[7m Choose only one option \33[0m')
+    else:
+        if up == True:
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes("-topmost", True)
+            file_path = filedialog.askopenfilename()
+            root.destroy()
+            if file_path == '':
+                print('\n!!!!!!! File not found !!!!!!!')
+                sys.exit()
+            else:
+                print('■ 1.',file_path)
+                df = pd.read_csv(file_path, sep = '\t', header = None).dropna()
+                if len(list(pd.read_csv(file_path, sep = '\t').columns)) == 1:
+                    df.drop_duplicates().to_csv('lista_seleccionada.tsv', sep = '\t', index = None)
+                else:
+                    print('◯ This file must contain one column')
+                    ###
+        if UP == True:
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes("-topmost", True)
+            file_path = filedialog.askopenfilename()
+            root.destroy()
+            if file_path == '':
+                print('\n!!!!!!! File not found !!!!!!!')
+                sys.exit()
+            else:
+                print('■ 1.',file_path)
+                columnas = ['Entry', 'Entry_name', 'Protein_name', 'Organism', 'Gene', 'Length', 'GO', 'Terms', 'Tax_ID', 'KINGDOM', 'PHYLUM', 'CLASS', 'ORDER', 'FAMILY', 'GENUS', 'SPECIES']
+                df = pd.read_csv(file_path, sep = '\t', names = columnas).dropna(subset = ['GO'])
+                if len(list(pd.read_csv(file_path, sep = '\t').columns)) == 16:
+                    df.to_csv('lista_seleccionada.tsv', sep = '\t', index = None)
+                else:
+                    print('\33[1m\33[7m ◯ This file must contain 16 columns  \33[0m')
+                    print('Entry|Entry_name|Protein_name|Organism|Gene|Length|GO|Terms|Tax_ID|KINGDOM|PHYLUM|CLASS|ORDER|FAMILY|GENUS|SPECIES')
+        
+salida = widgets.interactive_output(file_goslim, {'up':up,'UP':UP})
 ##
 def file_goslim2(gs):
     slim = []
@@ -1109,13 +1112,15 @@ def file_goslim2(gs):
     print('■ 2.',gs)
 salida2 = widgets.interactive_output(file_goslim2, {'gs':gs})
 ##
+
+
 def file_goslim3(run):
     if run == True:
-        result = RUN(lista = inputs()[0]['0'], GosliM = inputs()[1])
+        result = RUN(lista = inputs()[0], GosliM = inputs()[1])
         dfUniprot_dfGOSlim(dfUniprot = result[0], dfGOSlim = result[1])
 salida3 = widgets.interactive_output(file_goslim3, {'run':run})
 
-in1 = VBox([yyy, xxx, up, salida, xxx])
+in1 = VBox([yyy, xxx, HBox([up, UP]), salida, xxx])
 in2 = VBox([yyy, xxx, gs, salida2, xxx])
 in3 = VBox([yyy, xxx, run, salida3, xxx, yyy])
 
