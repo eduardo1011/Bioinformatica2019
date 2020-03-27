@@ -1046,7 +1046,7 @@ def dfUniprot_dfGOSlim(dfUniprot = DataFrame([]), dfGOSlim = DataFrame([])):
 import tkinter as tk
 from tkinter import filedialog
 
-up = widgets.Checkbox(description='Upload file',value=False,disabled=False)
+up = widgets.Checkbox(description='Upload file (List)',value=False,disabled=False)
 UP = widgets.Checkbox(description='Upload file (UniProt)',value=False,disabled=False)
 goslim = [re.search('go\w+', i).group() for i in ontology_file[0].split('\n') if re.search(' go\w+', i)]
 gs = widgets.Dropdown(options=goslim,description='GO Slim:',disabled=False,
