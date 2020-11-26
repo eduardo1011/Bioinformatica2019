@@ -34,6 +34,7 @@ import ipywidgets as widgets
 from IPython.display import clear_output, display 
 
 import urllib.request
+import datetime
 
 import itertools
 
@@ -1743,7 +1744,7 @@ def SELECTSAM(SAM_SELECT = ''):
         ax.axis('off')
 
         plt.savefig('PlotsITS/'+SAM_SELECT+'_'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
-    
+        plt.close()
     labebl2 = Label(root, text= '', font=("Arial", 8), fg="red", bg = 'white')
     labebl2.grid(column = 0, row = 7)
     
@@ -1790,7 +1791,7 @@ def SELECTSAM(SAM_SELECT = ''):
         ax.axis('off')
 
         plt.savefig('PlotsITS/'+SAM_SELECT+'_'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
-    
+        plt.close()
     
     boton = Button(root, text=" SVG ", cursor="hand2",
                 #activebackground= 'black',activeforeground= 'black',
@@ -1846,7 +1847,7 @@ def SELECTSAM(SAM_SELECT = ''):
     ax.set_xlim(0,2)
 
     ax.axis('off')
-    
+    plt.close()
 
     root.mainloop()
 
