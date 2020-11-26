@@ -34,6 +34,7 @@ from ipywidgets import Button, GridBox, Layout, ButtonStyle, Box, HBox, VBox
 import ipywidgets as widgets 
 from IPython.display import clear_output, display 
 
+import urllib.request
 
 import itertools
 
