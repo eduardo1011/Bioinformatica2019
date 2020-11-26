@@ -246,6 +246,17 @@ for i in list(NCBI_RDP_SILVA_summary_OTUs.columns[15:]):
 
 
 
+
+ordenado4 = list(set([int(re.search('[0-9]{1,2}', i).group()) for i in list(NCBI_RDP_SILVA_summary_ASVs.columns[15:])]))
+ordenado3 = {}
+for q in ordenado4:
+    for w in list(NCBI_RDP_SILVA_summary_ASVs.columns[15:]):
+        if re.search('^\d+', w[0:2]): 
+            if q == int(re.search('^\d+', w[0:2]).group()):
+                ordenado3[q] = w
+
+
+
 #ASVs
 TAX_DFS_ASVs = {}
 for TAX in ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']:
@@ -1720,7 +1731,7 @@ def SELECTSAM(SAM_SELECT = ''):
 
     root.mainloop()
 
-Sample_Select = widgets.Dropdown(options=list(Sampledata.Sample),value=list(Sampledata.Sample)[0],disabled=False,
+Sample_Select = widgets.Dropdown(options=list(ordenado3.values()),value=list(ordenado3.values())[0],disabled=False,
                          layout=Layout(width='88px', height='40px'))
 
 
@@ -1778,41 +1789,16 @@ indices_OTUs = pd.read_csv('Anexos16S/OTUs_Indices.tsv', sep = '\t')
 
 
 
-
-
-ordenado4 = list(set([int(re.search('[0-9]{1,2}', i).group()) for i in list(indices_ASVs.iloc[:, 1:].columns)]))
-ordenado3 = {}
-for q in ordenado4:
-    for w in list(indices_ASVs.iloc[:, 1:].columns):
-        if re.search('^\d+', w[0:2]): 
-            if q == int(re.search('^\d+', w[0:2]).group()):
-                ordenado3[q] = w
-
-
-
-
 idividuosASVs = indices_ASVs[indices_ASVs['Unnamed: 0'] == 'Individuals'].iloc[:, 1:]
-
-
-
 
 
 ASVs_counts = dict(zip(list(idividuosASVs.columns), list(idividuosASVs.values[0])))
 
 
-
-
-
 idividuosOTUs = indices_OTUs[indices_OTUs['Unnamed: 0'] == 'Individuals'].iloc[:, 1:]
 
 
-
-
-
 OTUs_counts = dict(zip(list(idividuosOTUs.columns), list(idividuosOTUs.values[0])))
-
-
-
 
 
 def indice_plot(data_ind = 'ASV', tipo_indice = 'Taxa_S', show_barras = True,
