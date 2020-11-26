@@ -1742,7 +1742,7 @@ def SELECTSAM(SAM_SELECT = ''):
 
         ax.axis('off')
 
-        plt.savefig('PlotsITS/'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
+        plt.savefig('PlotsITS/'+SAM_SELECT+'_'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
     
     labebl2 = Label(root, text= '', font=("Arial", 8), fg="red", bg = 'white')
     labebl2.grid(column = 0, row = 7)
@@ -1789,7 +1789,7 @@ def SELECTSAM(SAM_SELECT = ''):
 
         ax.axis('off')
 
-        plt.savefig('PlotsITS/'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
+        plt.savefig('PlotsITS/'+SAM_SELECT+'_'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
     
     
     boton = Button(root, text=" SVG ", cursor="hand2",
