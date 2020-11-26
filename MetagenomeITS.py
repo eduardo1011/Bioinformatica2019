@@ -2788,9 +2788,9 @@ def plot_pca3(dpca3 = 'ASV', variable = 'Coffee_Variety', CoLoR = 'tab10',
 
         N_Cols = list(DATAFRAME_SUMARY.iloc[:, 1:].columns)
         ONE = DATAFRAME_SUMARY.set_index('Species')
-        DisMat, bc_matrix, id_samples = table_to_distances(ONE, bray_curtis_distance)
+        bc_matrix, id_samples = table_to_distances(ONE, bray_curtis_distance)
 
-        SAMple = Sampledata
+        SAMple = DataFrame(id_samples, columns = ['Sample']).merge(Sampledata, on = 'Sample', how = 'left')
         SAMple =SAMple.set_index('Sample')
 
         bc_matrix_condensed_ASVs = squareform(bc_matrix, force='tovector', checks=False)
@@ -2814,7 +2814,7 @@ def plot_pca3(dpca3 = 'ASV', variable = 'Coffee_Variety', CoLoR = 'tab10',
         DF_3 = pd.DataFrame({'PCA1':pca_3[:,0], 'PCA2':pca_3[:, 1], 'PCA3':pca_3[:, 2], 'clase':DfDf[variable]})
 
 
-        Permanova = permanova(DisMat, SAMple, variable)['p-value']
+        Permanova = permanova(bc_matrix, SAMple, variable)['p-value']
 
 
         mpl.rcParams.update(mpl.rcParamsDefault)
@@ -3036,10 +3036,8 @@ def plot_pca3(dpca3 = 'ASV', variable = 'Coffee_Variety', CoLoR = 'tab10',
 
             N_Cols = list(DATAFRAME_SUMARY.iloc[:, 1:].columns)
             ONE = DATAFRAME_SUMARY.set_index('Species')
-            DisMat, bc_matrix, id_samples = table_to_distances(ONE, bray_curtis_distance)
+            bc_matrix, id_samples = table_to_distances(ONE, bray_curtis_distance)
 
-            SAMple = Sampledata
-            SAMple =SAMple.set_index('Sample')
 
             DfDf = DataFrame(bc_matrix, columns = id_samples)
             DfDf.insert(loc = 0, column='Sample', value= id_samples)
@@ -3352,10 +3350,6 @@ def plot_pca3(dpca3 = 'ASV', variable = 'Coffee_Variety', CoLoR = 'tab10',
                 UniFracDF = UniFracDF.merge(Sampledata, on = 'Sample', how = 'left')
                 UniFracDF = UniFracDF.set_index('Sample')
                 id_samples = id_samples_OTUs
-
-
-            SAMple = Sampledata
-            SAMple =SAMple.set_index('Sample')
 
             UU = StandardScaler()
             UniFracDF[id_samples] = UU.fit_transform(UniFracDF[id_samples].astype('float'))
