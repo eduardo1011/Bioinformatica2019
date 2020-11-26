@@ -392,9 +392,9 @@ def update_plot(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_met
                        prop={'size':7})
             
             if png == True:
-                plt.savefig('PlotsITS/'+etiqueta+'_Global_Taxonomic_Level_Stacked_VBar_'+umbral+'.png', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/'+etiqueta+'_Global_Taxonomic_Level_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
             if svg == True:
-                plt.savefig('PlotsITS/'+etiqueta+'_Global_Taxonomic_Level_Stacked_VBar_'+umbral+'.svg', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/'+etiqueta+'_Global_Taxonomic_Level_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
             plt.show()
         else:
             print('To show the vertical graph you have to disable:\nDendrogram, Pie Plots and Metadata')
@@ -579,9 +579,9 @@ def update_plot(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_met
             plt.gca().set_ylabel('', fontsize=0)
 
         if png == True:
-            plt.savefig('PlotsITS/'+etiqueta+'_Global_Taxonomic_Level_Stacked_HBar_'+umbral+'.png', dpi = 900, bbox_inches= 'tight')
+            plt.savefig('PlotsITS/'+etiqueta+'_Global_Taxonomic_Level_Stacked_HBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
         if svg == True:
-            plt.savefig('PlotsITS/'+etiqueta+'_Global_Taxonomic_Level_Stacked_HBar_'+umbral+'.svg', dpi = 900, bbox_inches= 'tight')
+            plt.savefig('PlotsITS/'+etiqueta+'_Global_Taxonomic_Level_Stacked_HBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
 
         plt.show()
 
@@ -684,9 +684,9 @@ def update_plot2(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_me
                        prop={'style':'italic', 'size':5})
             
             if png == True:
-                plt.savefig('PlotsITS/'+etiqueta+'_Taxonomic_Level_'+tax+'_Stacked_VBar_'+umbral+'.png', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/'+etiqueta+'_Taxonomic_Level_'+tax+'_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
             if svg == True:
-                plt.savefig('PlotsITS/'+etiqueta+'_Taxonomic_Level_'+tax+'_Stacked_VBar_'+umbral+'.svg', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/'+etiqueta+'_Taxonomic_Level_'+tax+'_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
             plt.show()
         else:
             print('To show the vertical graph you have to disable:\nDendrogram, Pie Plots and Metadata')
@@ -870,9 +870,9 @@ def update_plot2(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_me
             plt.gca().set_ylabel('', fontsize=0)
 
         if png == True:
-            plt.savefig('PlotsITS/'+etiqueta+'_Taxonomic_Level_'+tax+'_Stacked_HBar_'+umbral+'.png', dpi = 900, bbox_inches= 'tight')
+            plt.savefig('PlotsITS/'+etiqueta+'_Taxonomic_Level_'+tax+'_Stacked_HBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
         if svg == True:
-            plt.savefig('PlotsITS/'+etiqueta+'_Taxonomic_Level_'+tax+'_Stacked_HBar_'+umbral+'.svg', dpi = 900, bbox_inches= 'tight')
+            plt.savefig('PlotsITS/'+etiqueta+'_Taxonomic_Level_'+tax+'_Stacked_HBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
 
         plt.show()
         
@@ -976,7 +976,7 @@ def button_clicked3(b):
                    png = True, svg = False, etiqueta = data.value, umbral = str(Percentage.value),
                     orientacion = orientation.value)
 
-    #print('Saved plot:', data.value+'_Global_Taxonomic_Level_Stacked_'+orientation.value+'_'+str(Percentage.value)+'.png', end='\r')
+
         
 boton3.on_click(button_clicked3)
 #----------------------------------------------
@@ -992,7 +992,7 @@ def button_clicked5(b):
                    png = False, svg = True, etiqueta = data.value, umbral = str(Percentage.value),
                     orientacion = orientation.value)
         
-    #print('Saved plot:', data.value+'_Global_Taxonomic_Level_Stacked_'+orientation.value+'_'+str(Percentage.value)+'.svg', end='\r')
+
         
 boton5.on_click(button_clicked5)
 
@@ -1441,7 +1441,7 @@ def button_clicked333(b):
                      mostrar_metadata = show_anotaciones_i.value, orientacion = orientation_i.value,
                rampa = Rampas2.value, etiqueta = data_i.value, umbral = str(Percentage2.value), NUCOL = NumcoL.value, tax = Linaje.value,
             png = True, svg = False)
-    #print('Saved plot:', data.value+'_Taxonomic_Level_'+Linaje.value+'_Stacked_'+orientation.value+'_'+str(Percentage2.value)+'.png', end='\r')
+
         
 boton333.on_click(button_clicked333)
 #----------------------------------------------
@@ -1456,7 +1456,7 @@ def button_clicked444(b):
                      mostrar_metadata = show_anotaciones_i.value, orientacion = orientation_i.value,
                rampa = Rampas2.value, etiqueta = data_i.value, umbral = str(Percentage2.value), NUCOL = NumcoL.value, tax = Linaje.value,
             png = False, svg = True)
-    #print('Saved plot:', data.value+'_Taxonomic_Level_'+Linaje.value+'_Stacked_'+orientation.value+'_'+str(Percentage2.value)+'.svg', end='\r')
+
         
 boton444.on_click(button_clicked444)
 
@@ -1595,7 +1595,7 @@ box_layout111 = Layout(display='flex',
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 def SELECTSAM(SAM_SELECT = ''):
-
+    import datetime
     sumary111 = []
     uno = open('AnexosITS/AAbundancEE.txt', 'r')
     for enu, line in enumerate(uno):
@@ -1645,6 +1645,10 @@ def SELECTSAM(SAM_SELECT = ''):
 
     cero = Label(root, text=SAM_SELECT, font=("Arial", 12,  "bold"), fg = 'black', bg = 'lime')
     cero.grid(column=0, row=0, sticky = W+E+S)
+    
+    
+    cero1 = Label(root, text='ITS Analysis', font=("Arial", 12,  "bold"), fg = 'silver', bg = 'white')
+    cero1.grid(column=4, row=0, sticky = W+S)
 
     labebl = Label(root, text= '', font=("Arial", 8), fg="red", bg = 'white')
     labebl.grid(column = 0, row = 1)
@@ -1701,6 +1705,100 @@ def SELECTSAM(SAM_SELECT = ''):
     #--------------------------------------------------------
     labebl = Label(root, text= '', font=("Arial", 8), fg="red", bg = 'white')
     labebl.grid(column = 3, row = 4)
+    
+    def salvarpng():
+        mpl.rcParams.update(mpl.rcParamsDefault)
+        figure = plt.figure(figsize=(6,3))
+
+        ax = figure.add_axes([0, 0, 1, 1])
+
+        ax.pie(df_one[SAM_SELECT].tolist(), #autopct ='%1.1f%%',
+               labels = None,
+                                    pctdistance = 1, labeldistance= 1,
+                                    startangle = 0, radius = 0.4, rotatelabels = True,frame=True,
+               center=(0.5, 0.5),
+                                    colors = [CorrepondenciA[i] for i in df_one.index],
+                                    wedgeprops={'alpha':1, 'linewidth': 0, 'edgecolor':'black'},
+                                    explode = np.array([0.0]*len(df_one)), textprops=dict(size = 8))
+        if len(df_one) <= 17:
+            plt.legend(df_one.index, bbox_to_anchor= [0.47,0.9], loc = 2,
+                       handletextpad=0.5,ncol= 1,title=Linaje.value, title_fontsize = 7,
+                                       fancybox=True, framealpha=0.5, shadow=False,
+                                       handlelength = .7, labelspacing = 0.5, columnspacing = 1,
+                                       borderpad = 0.5, edgecolor="gainsboro", #frameon=False,
+                                       prop={'style':'italic', 'size':6.5})
+        else:
+            plt.legend(df_one.index, bbox_to_anchor= [0.47,0.9], loc = 2,
+                       handletextpad=0.5,ncol= 2,title=Linaje.value, title_fontsize = 7,
+                                       fancybox=True, framealpha=0.5, shadow=False,
+                                       handlelength = .7, labelspacing = 0.5, columnspacing = 1,
+                                       borderpad = 0.5, edgecolor="gainsboro", #frameon=False,
+                                       prop={'style':'italic', 'size':6.5})
+    
+        centre_circle = plt.Circle((0.5,0.5),0.2,fc = 'white')
+        plt.gca().add_artist(centre_circle)
+
+        ax.set_xlim(0,2)
+
+        ax.axis('off')
+
+        plt.savefig('PlotsITS/'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
+    
+    labebl2 = Label(root, text= '', font=("Arial", 8), fg="red", bg = 'white')
+    labebl2.grid(column = 0, row = 7)
+    
+    boton = Button(root, text=" PNG ", cursor="hand2",
+                #activebackground= 'black',activeforeground= 'black',
+                bg="gold", fg="black",font=("Arial", 8),
+                    command = salvarpng) # newwin.destroy
+    boton.grid(column = 0, row = 8)
+    
+    def salvarsvg():
+        mpl.rcParams.update(mpl.rcParamsDefault)
+        figure = plt.figure(figsize=(6,3))
+
+        ax = figure.add_axes([0, 0, 1, 1])
+
+        ax.pie(df_one[SAM_SELECT].tolist(), #autopct ='%1.1f%%',
+               labels = None,
+                                    pctdistance = 1, labeldistance= 1,
+                                    startangle = 0, radius = 0.4, rotatelabels = True,frame=True,
+               center=(0.5, 0.5),
+                                    colors = [CorrepondenciA[i] for i in df_one.index],
+                                    wedgeprops={'alpha':1, 'linewidth': 0, 'edgecolor':'black'},
+                                    explode = np.array([0.0]*len(df_one)), textprops=dict(size = 8))
+        if len(df_one) <= 17:
+            plt.legend(df_one.index, bbox_to_anchor= [0.47,0.9], loc = 2,
+                       handletextpad=0.5,ncol= 1,title=Linaje.value, title_fontsize = 7,
+                                       fancybox=True, framealpha=0.5, shadow=False,
+                                       handlelength = .7, labelspacing = 0.5, columnspacing = 1,
+                                       borderpad = 0.5, edgecolor="gainsboro", #frameon=False,
+                                       prop={'style':'italic', 'size':6.5})
+        else:
+            plt.legend(df_one.index, bbox_to_anchor= [0.47,0.9], loc = 2,
+                       handletextpad=0.5,ncol= 2,title=Linaje.value, title_fontsize = 7,
+                                       fancybox=True, framealpha=0.5, shadow=False,
+                                       handlelength = .7, labelspacing = 0.5, columnspacing = 1,
+                                       borderpad = 0.5, edgecolor="gainsboro", #frameon=False,
+                                       prop={'style':'italic', 'size':6.5})
+    
+        centre_circle = plt.Circle((0.5,0.5),0.2,fc = 'white')
+        plt.gca().add_artist(centre_circle)
+
+        ax.set_xlim(0,2)
+
+        ax.axis('off')
+
+        plt.savefig('PlotsITS/'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
+    
+    
+    boton = Button(root, text=" SVG ", cursor="hand2",
+                #activebackground= 'black',activeforeground= 'black',
+                bg="gold", fg="black",font=("Arial", 8),
+                    command = salvarsvg) # newwin.destroy
+    boton.grid(column = 1, row = 8)
+    
+    #-------------------------------------
 
 
     group_aspect = LabelFrame(root, text = "", font=("Arial", 8,  "bold"), height = 1)
@@ -1728,13 +1826,14 @@ def SELECTSAM(SAM_SELECT = ''):
                                 explode = np.array([0.0]*len(df_one)), textprops=dict(size = 8))
     if len(df_one) <= 17:
         plt.legend(df_one.index, bbox_to_anchor= [0.47,0.9], loc = 2,
-                   handletextpad=0.5,ncol= 1,
+                   handletextpad=0.5,ncol= 1, title=Linaje.value, title_fontsize = 7,
                                    fancybox=True, framealpha=0.5, shadow=False,
                                    handlelength = .7, labelspacing = 0.5, columnspacing = 1,
                                    borderpad = 0.5, edgecolor="gainsboro", #frameon=False,
                                    prop={'style':'italic', 'size':6.5})
     else:
         plt.legend(df_one.index, bbox_to_anchor= [0.47,0.9], loc = 2,
+                   title=Linaje.value, title_fontsize = 7,
                    handletextpad=0.5,ncol= 2,
                                    fancybox=True, framealpha=0.5, shadow=False,
                                    handlelength = .7, labelspacing = 0.5, columnspacing = 1,
@@ -1747,7 +1846,7 @@ def SELECTSAM(SAM_SELECT = ''):
     ax.set_xlim(0,2)
 
     ax.axis('off')
-    plt.close()
+    
 
     root.mainloop()
 
@@ -1902,9 +2001,9 @@ def indice_plot(data_ind = 'ASV', tipo_indice = 'Taxa_S', show_barras = True,
     plt.gca().set_xlabel('', fontsize=0)
 
     if png == True:
-        plt.savefig('PlotsITS/'+data_ind+'_Diversity_Index_'+tipo_indice+'.png', dpi = 900, bbox_inches= 'tight')
+        plt.savefig('PlotsITS/'+data_ind+'_Diversity_Index_'+tipo_indice+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
     if svg == True:
-        plt.savefig('PlotsITS/'+data_ind+'_Diversity_Index_'+tipo_indice+'.svg', dpi = 900, bbox_inches= 'tight')
+        plt.savefig('PlotsITS/'+data_ind+'_Diversity_Index_'+tipo_indice+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
     plt.show()
 
 
@@ -1994,7 +2093,7 @@ def button_ind_plot_save(b):
                 show_puntos = show_puntos.value, show_texto = show_texto.value, ColormaP = Rampas3.value,
                    tamano = cor_size2[tamano_plot_ind.value], png = True, svg = False, linea = show_linea.value,
                    ancholinea = lineancho.value)
-    #print('Saved plot:', data_ind.value+'_Diversity_Index_'+tipo_indice.value+'.png', end='\r')
+
 
 but_ind_plot_save.on_click(button_ind_plot_save)
 #----------------------------------------------
@@ -2009,7 +2108,7 @@ def button_ind_plot_save2(b):
                 show_puntos = show_puntos.value, show_texto = show_texto.value, ColormaP = Rampas3.value,
                    tamano = cor_size2[tamano_plot_ind.value], png = False, svg = True, linea = show_linea.value,
                    ancholinea = lineancho.value)
-    #print('Saved plot:', data_ind.value+'_Diversity_Index_'+tipo_indice.value+'.png', end='\r')
+
 but_ind_plot_save2.on_click(button_ind_plot_save2)
 
 
@@ -2194,9 +2293,9 @@ def index_plots(data_ind2 = 'ASV', tipo_indice2 = 'Taxa_S', ColormaP2 = 'RdYlGn'
         plt.gca().set_ylabel(tipo_indice2, fontsize=LETRA+1)
         
         if png == True:
-            plt.savefig('PlotsITS/'+data_ind2+'_Diversity_Index_'+var+'_'+tipo_indice2+'_'+str(SIG_val)+'.png', dpi = 900, bbox_inches= 'tight')
+            plt.savefig('PlotsITS/'+data_ind2+'_Diversity_Index_'+var+'_'+tipo_indice2+'_'+str(SIG_val)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
         if svg == True:
-            plt.savefig('PlotsITS/'+data_ind2+'_Diversity_Index_'+var+'_'+tipo_indice2+'_'+str(SIG_val)+'.svg', dpi = 900, bbox_inches= 'tight')
+            plt.savefig('PlotsITS/'+data_ind2+'_Diversity_Index_'+var+'_'+tipo_indice2+'_'+str(SIG_val)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
         plt.show()
         
     else:
@@ -2279,9 +2378,9 @@ def index_plots(data_ind2 = 'ASV', tipo_indice2 = 'Taxa_S', ColormaP2 = 'RdYlGn'
         plt.gca().set_ylabel(tipo_indice2, fontsize=LETRA+1)
         
         if png == True:
-            plt.savefig('PlotsITS/'+data_ind2+'_Diversity_Index_'+var+'_'+tipo_indice2+'_'+str(SIG_val)+'.png', dpi = 900, bbox_inches= 'tight')
+            plt.savefig('PlotsITS/'+data_ind2+'_Diversity_Index_'+var+'_'+tipo_indice2+'_'+str(SIG_val)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
         if svg == True:
-            plt.savefig('PlotsITS/'+data_ind2+'_Diversity_Index_'+var+'_'+tipo_indice2+'_'+str(SIG_val)+'.svg', dpi = 900, bbox_inches= 'tight')
+            plt.savefig('PlotsITS/'+data_ind2+'_Diversity_Index_'+var+'_'+tipo_indice2+'_'+str(SIG_val)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
         
         plt.show()
 
@@ -2401,7 +2500,7 @@ def button_ind_sig_save(b):
         index_plots(data_ind2 = data_caja.value, tipo_indice2 = tipo_indice2.value, ColormaP2 = Rampas4.value, var = VariableS.value,
                SIG_val = significancia.value, SIG = show_sigbar.value, TAMANO = cor_size3[tamano_plot_sig.value],
                    showmedia = show_media.value, showstd = show_std.value, png = True, svg = False)
-    #print('Saved plot:', data_caja.value+'_Diversity_Index_'+VariableS.value+'_'+tipo_indice2.value+'_'+str(significancia.value)+'.png', end='\r')
+
 
 but_ind_sig_save.on_click(button_ind_sig_save)
 #------------------------------------------------------
@@ -2415,7 +2514,7 @@ def button_ind_sig_save2(b):
         index_plots(data_ind2 = data_caja.value, tipo_indice2 = tipo_indice2.value, ColormaP2 = Rampas4.value, var = VariableS.value,
                SIG_val = significancia.value, SIG = show_sigbar.value, TAMANO = cor_size3[tamano_plot_sig.value],
                    showmedia = show_media.value, showstd = show_std.value, png = False, svg = True)
-    #print('Saved plot:', data_caja.value+'_Diversity_Index_'+VariableS.value+'_'+tipo_indice2.value+'_'+str(significancia.value)+'.png', end='\r')
+
 
 but_ind_sig_save2.on_click(button_ind_sig_save2)
 
@@ -2937,9 +3036,9 @@ def plot_pca3(dpca3 = 'ASV', variable = 'Coffee_Variety', CoLoR = 'tab10',
                 ax2.axis('off')
 
             if png == True:
-                plt.savefig('PlotsITS/PCA3_No_Phylogenetic_'+dpca3+'_'+variable+'.png', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/PCA3_No_Phylogenetic_'+dpca3+'_'+variable+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
             if svg == True:
-                plt.savefig('PlotsITS/PCA3_No_Phylogenetic_'+dpca3+'_'+variable+'.svg', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/PCA3_No_Phylogenetic_'+dpca3+'_'+variable+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
 
             plt.show()
 
@@ -3019,9 +3118,9 @@ def plot_pca3(dpca3 = 'ASV', variable = 'Coffee_Variety', CoLoR = 'tab10',
                 ax2.axis('off')
 
             if png == True:
-                plt.savefig('PlotsITS/PCA2_No_Phylogenetic_'+dpca3+'_'+variable+'.png', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/PCA2_No_Phylogenetic_'+dpca3+'_'+variable+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
             if svg == True:
-                plt.savefig('PlotsITS/PCA2_No_Phylogenetic_'+dpca3+'_'+variable+'.svg', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/PCA2_No_Phylogenetic_'+dpca3+'_'+variable+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
 
             plt.show()
             
@@ -3250,9 +3349,9 @@ def plot_pca3(dpca3 = 'ASV', variable = 'Coffee_Variety', CoLoR = 'tab10',
                 ax2.axis('off')
 
             if png == True:
-                plt.savefig('PlotsITS/PCA3_Phylogenetic_'+dpca3+'_'+variable+'.png', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/PCA3_Phylogenetic_'+dpca3+'_'+variable+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
             if svg == True:
-                plt.savefig('PlotsITS/PCA3_Phylogenetic_'+dpca3+'_'+variable+'.svg', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/PCA3_Phylogenetic_'+dpca3+'_'+variable+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
 
             plt.show()
 
@@ -3329,9 +3428,9 @@ def plot_pca3(dpca3 = 'ASV', variable = 'Coffee_Variety', CoLoR = 'tab10',
                 ax2.axis('off')
 
             if png == True:
-                plt.savefig('PlotsITS/PCA2_Phylogenetic_'+dpca3+'_'+variable+'.png', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/PCA2_Phylogenetic_'+dpca3+'_'+variable+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
             if svg == True:
-                plt.savefig('PlotsITS/PCA2_Phylogenetic_'+dpca3+'_'+variable+'.svg', dpi = 900, bbox_inches= 'tight')
+                plt.savefig('PlotsITS/PCA2_Phylogenetic_'+dpca3+'_'+variable+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
 
             plt.show()
         
@@ -3482,7 +3581,7 @@ def button_PCA3_save(b):
                      png = True, svg = False, enfoque = select_beta.value)
         
         
-    #print('Saved plot:', 'PCA'+select_PCA.value[0]+'_'+data_pca.value+'_'+VariableS_pca.value+'.png', end='\r')
+
 
 but_PCA3_save.on_click(button_PCA3_save)
 #----------------------------------------------------------
@@ -3503,7 +3602,7 @@ def button_PCA3_save2(b):
                      png = False, svg = True, enfoque = select_beta.value)
         
         
-    #print('Saved plot:', 'PCA'+select_PCA.value[0]+'_'+data_pca.value+'_'+VariableS_pca.value+'.png', end='\r')
+
 
 but_PCA3_save2.on_click(button_PCA3_save2)
 
