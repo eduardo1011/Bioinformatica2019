@@ -2388,11 +2388,251 @@ SIGNIFICATIVO = VBox([Box([HBox([VBox([widgets.Label('Clustering:'), boton_data_
 from numpy import zeros
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from skbio.stats.distance import permanova
 from mpl_toolkits.mplot3d import Axes3D
-from skbio.stats.distance import DistanceMatrix
-from skbio.tree import TreeNode
 from scipy.spatial.distance import squareform
+
+
+
+
+###############  obtenido a partir de SKBIO
+from functools import partial
+def _preprocess_input(distance_matrix, grouping, column):
+    """Compute intermediate results not affected by permutations.
+
+    These intermediate results can be computed a single time for efficiency,
+    regardless of grouping vector permutations (i.e., when calculating the
+    p-value). These intermediate results are used by both ANOSIM and PERMANOVA.
+
+    Also validates and normalizes input (e.g., converting ``DataFrame`` column
+    into grouping vector).
+
+    """
+    #if not isinstance(distance_matrix, DistanceMatrix):
+    #    raise TypeError("Input must be a DistanceMatrix.")
+
+    if isinstance(grouping, pd.DataFrame):
+        if column is None:
+            raise ValueError(
+                "Must provide a column name if supplying a DataFrame.")
+        else:
+            grouping = _df_to_vector(distance_matrix, grouping, column)
+    elif column is not None:
+        raise ValueError(
+            "Must provide a DataFrame if supplying a column name.")
+
+    sample_size = distance_matrix.shape[0]
+    if len(grouping) != sample_size:
+        raise ValueError(
+            "Grouping vector size must match the number of IDs in the "
+            "distance matrix.")
+
+    # Find the group labels and convert grouping to an integer vector
+    # (factor).
+    groups, grouping = np.unique(grouping, return_inverse=True)
+    num_groups = len(groups)
+
+    if num_groups == len(grouping):
+        raise ValueError(
+            "All values in the grouping vector are unique. This method cannot "
+            "operate on a grouping vector with only unique values (e.g., "
+            "there are no 'within' distances because each group of objects "
+            "contains only a single object).")
+    if num_groups == 1:
+        raise ValueError(
+            "All values in the grouping vector are the same. This method "
+            "cannot operate on a grouping vector with only a single group of "
+            "objects (e.g., there are no 'between' distances because there is "
+            "only a single group).")
+
+    tri_idxs = np.triu_indices(sample_size, k=1)
+    distances = squareform(distance_matrix, force='tovector', checks=False) # CAMBIOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
+    return sample_size, num_groups, grouping, tri_idxs, distances
+
+    
+    
+def _df_to_vector(distance_matrix, df, column):
+    """Return a grouping vector from a ``DataFrame`` column.
+
+    Parameters
+    ----------
+    distance_marix : DistanceMatrix
+        Distance matrix whose IDs will be mapped to group labels.
+    df : pandas.DataFrame
+        ``DataFrame`` (indexed by distance matrix ID).
+    column : str
+        Column name in `df` containing group labels.
+
+    Returns
+    -------
+    list
+        Grouping vector (vector of labels) based on the IDs in
+        `distance_matrix`. Each ID's label is looked up in the ``DataFrame``
+        under the column specified by `column`.
+
+    Raises
+    ------
+    ValueError
+        If `column` is not in the ``DataFrame``, or a distance matrix ID is
+        not in the ``DataFrame``.
+
+    """
+    if column not in df:
+        raise ValueError("Column '%s' not in DataFrame." % column)
+
+    grouping = df.reindex(df.index, axis=0).loc[:, column] # CAMBIOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+    if grouping.isnull().any():
+        raise ValueError(
+            "One or more IDs in the distance matrix are not in the data "
+            "frame.")
+    return grouping.tolist()
+
+def _compute_f_stat(sample_size, num_groups, tri_idxs, distances, group_sizes,
+                    s_T, grouping):
+    """Compute PERMANOVA pseudo-F statistic."""
+    # Create a matrix where objects in the same group are marked with the group
+    # index (e.g. 0, 1, 2, etc.). objects that are not in the same group are
+    # marked with -1.
+    grouping_matrix = -1 * np.ones((sample_size, sample_size), dtype=int)
+    for group_idx in range(num_groups):
+        within_indices = _index_combinations(
+            np.where(grouping == group_idx)[0])
+        grouping_matrix[within_indices] = group_idx
+
+    # Extract upper triangle (in same order as distances were extracted
+    # from full distance matrix).
+    grouping_tri = grouping_matrix[tri_idxs]
+
+    # Calculate s_W for each group, accounting for different group sizes.
+    s_W = 0
+    for i in range(num_groups):
+        s_W += (distances[grouping_tri == i] ** 2).sum() / group_sizes[i]
+
+    s_A = s_T - s_W
+    return (s_A / (num_groups - 1)) / (s_W / (sample_size - num_groups))
+
+def _index_combinations(indices):
+    # Modified from http://stackoverflow.com/a/11144716
+    return np.tile(indices, len(indices)), np.repeat(indices, len(indices))
+def _run_monte_carlo_stats(test_stat_function, grouping, permutations):
+    """Run stat test and compute significance with Monte Carlo permutations."""
+    if permutations < 0:
+        raise ValueError(
+            "Number of permutations must be greater than or equal to zero.")
+
+    stat = test_stat_function(grouping)
+
+    p_value = np.nan
+    if permutations > 0:
+        perm_stats = np.empty(permutations, dtype=np.float64)
+
+        for i in range(permutations):
+            perm_grouping = np.random.permutation(grouping)
+            perm_stats[i] = test_stat_function(perm_grouping)
+
+        p_value = ((perm_stats >= stat).sum() + 1) / (permutations + 1)
+
+    return stat, p_value
+def _build_results(method_name, test_stat_name, sample_size, num_groups, stat,
+                   p_value, permutations):
+    """Return ``pandas.Series`` containing results of statistical test."""
+    return pd.Series(
+        data=[method_name, test_stat_name, sample_size, num_groups, stat,
+              p_value, permutations],
+        index=['method name', 'test statistic name', 'sample size',
+               'number of groups', 'test statistic', 'p-value',
+               'number of permutations'],
+        name='%s results' % method_name)
+def permanova(distance_matrix, grouping, column=None, permutations=999):
+    """Test for significant differences between groups using PERMANOVA.
+
+    Permutational Multivariate Analysis of Variance (PERMANOVA) is a
+    non-parametric method that tests whether two or more groups of objects
+    (e.g., samples) are significantly different based on a categorical factor.
+    It is conceptually similar to ANOVA except that it operates on a distance
+    matrix, which allows for multivariate analysis. PERMANOVA computes a
+    pseudo-F statistic.
+
+    Statistical significance is assessed via a permutation test. The assignment
+    of objects to groups (`grouping`) is randomly permuted a number of times
+    (controlled via `permutations`). A pseudo-F statistic is computed for each
+    permutation and the p-value is the proportion of permuted pseudo-F
+    statisics that are equal to or greater than the original (unpermuted)
+    pseudo-F statistic.
+
+    Parameters
+    ----------
+    distance_matrix : DistanceMatrix
+        Distance matrix containing distances between objects (e.g., distances
+        between samples of microbial communities).
+    grouping : 1-D array_like or pandas.DataFrame
+        Vector indicating the assignment of objects to groups. For example,
+        these could be strings or integers denoting which group an object
+        belongs to. If `grouping` is 1-D ``array_like``, it must be the same
+        length and in the same order as the objects in `distance_matrix`. If
+        `grouping` is a ``DataFrame``, the column specified by `column` will be
+        used as the grouping vector. The ``DataFrame`` must be indexed by the
+        IDs in `distance_matrix` (i.e., the row labels must be distance matrix
+        IDs), but the order of IDs between `distance_matrix` and the
+        ``DataFrame`` need not be the same. All IDs in the distance matrix must
+        be present in the ``DataFrame``. Extra IDs in the ``DataFrame`` are
+        allowed (they are ignored in the calculations).
+    column : str, optional
+        Column name to use as the grouping vector if `grouping` is a
+        ``DataFrame``. Must be provided if `grouping` is a ``DataFrame``.
+        Cannot be provided if `grouping` is 1-D ``array_like``.
+    permutations : int, optional
+        Number of permutations to use when assessing statistical
+        significance. Must be greater than or equal to zero. If zero,
+        statistical significance calculations will be skipped and the p-value
+        will be ``np.nan``.
+
+    Returns
+    -------
+    pandas.Series
+        Results of the statistical test, including ``test statistic`` and
+        ``p-value``.
+
+    See Also
+    --------
+    anosim
+
+    Notes
+    -----
+    See [1]_ for the original method reference, as well as ``vegan::adonis``,
+    available in R's vegan package [2]_.
+
+    The p-value will be ``np.nan`` if `permutations` is zero.
+
+    References
+    ----------
+    .. [1] Anderson, Marti J. "A new method for non-parametric multivariate
+       analysis of variance." Austral Ecology 26.1 (2001): 32-46.
+
+    .. [2] http://cran.r-project.org/web/packages/vegan/index.html
+
+    Examples
+    --------
+    See :mod:`skbio.stats.distance.anosim` for usage examples (both functions
+    provide similar interfaces).
+
+    """
+    sample_size, num_groups, grouping, tri_idxs, distances = _preprocess_input(
+        distance_matrix, grouping, column)
+
+    # Calculate number of objects in each group.
+    group_sizes = np.bincount(grouping)
+    s_T = (distances ** 2).sum() / sample_size
+
+    test_stat_function = partial(_compute_f_stat, sample_size, num_groups,
+                                 tri_idxs, distances, group_sizes, s_T)
+    stat, p_value = _run_monte_carlo_stats(test_stat_function, grouping,
+                                           permutations)
+
+    return _build_results('PERMANOVA', 'pseudo-F', sample_size, num_groups,
+                          stat, p_value, permutations)
+###########################################
+
 
 
 
@@ -2412,43 +2652,7 @@ def table_to_distances(table, pairwise_distance_fn):
     for i, sample1_id in enumerate(sample_ids):
         for j, sample2_id in enumerate(sample_ids[:i]):
             data[i,j] = data[j,i] = pairwise_distance_fn(table, sample1_id, sample2_id)
-    return DistanceMatrix(data, sample_ids), data, list(sample_ids)
-def get_observed_nodes(tree, table, sample_id, verbose=False):
-    observed_otus = [obs_id for obs_id in table.index
-                if table[sample_id][obs_id] > 0]
-    observed_nodes = set()
-    # iterate over the observed OTUs
-    for otu in observed_otus:
-        t = tree.find(otu)
-        observed_nodes.add(t)
-        if verbose:
-            print(t.name, t.length, end=' ')
-        for internal_node in t.ancestors():
-            if internal_node.length is None:
-                # we've hit the root
-                if verbose:
-                    print('')
-            else:
-                if verbose and internal_node not in observed_nodes:
-                    print(internal_node.length, end=' ')
-                observed_nodes.add(internal_node)
-    return observed_nodes
-def unweighted_unifrac(tree, table, sample_id1, sample_id2, verbose=False):
-    observed_nodes1 = get_observed_nodes(tree, table, sample_id1, verbose=verbose)
-    observed_nodes2 = get_observed_nodes(tree, table, sample_id2, verbose=verbose)
-    observed_branch_length = sum(o.length for o in observed_nodes1 | observed_nodes2)
-    shared_branch_length = sum(o.length for o in observed_nodes1 & observed_nodes2)
-    unique_branch_length = observed_branch_length - shared_branch_length
-    unweighted_unifrac = unique_branch_length / observed_branch_length
-    return unweighted_unifrac
-def table_to_distances2(table, tree, pairwise_distance_fn):
-    sample_ids = table.columns
-    num_samples = len(sample_ids)
-    data = zeros((num_samples, num_samples))
-    for i, sample1_id in enumerate(sample_ids):
-        for j, sample2_id in enumerate(sample_ids[:i]):
-            data[i,j] = data[j,i] = pairwise_distance_fn(tree, table, sample1_id, sample2_id, verbose=False)
-    return DistanceMatrix(data, sample_ids), data, list(sample_ids)
+    return data, list(sample_ids)
 
 
 
@@ -2456,28 +2660,36 @@ def table_to_distances2(table, tree, pairwise_distance_fn):
 DATAFRAME_PHYLOGENETIC_ASVs = pd.read_csv('Anexos16S/ASVs_Phylogenetic_Tree.tsv', sep = '\t')
 DATAFRAME_PHYLOGENETIC_ASVs = DATAFRAME_PHYLOGENETIC_ASVs.set_index('#OTU ID')
 N_Cols_ASVs = list(DATAFRAME_PHYLOGENETIC_ASVs.columns)
-arboll_ASVs = open('Anexos16S/clustal_ASVs_Tree.txt', 'r')
-arbol_ASVs = arboll_ASVs.read()
-arboll_ASVs.close()
-arbol_ASVs = ''.join(arbol_ASVs.split('\n'))
-newick_tree_ASVs = StringIO(arbol_ASVs)
-tree_ASVs = TreeNode.read(newick_tree_ASVs)
-tree_ASVs = tree_ASVs.root_at_midpoint()
-DisMat2_ASVs, unifrac_matrix_ASVs, id_samples_ASVs = table_to_distances2(DATAFRAME_PHYLOGENETIC_ASVs,
-                                                                         tree_ASVs, unweighted_unifrac)
+
+if os.path.exists('Anexos16S/unifrac_matrix_16S_ASVs.txt') == True:
+    frame_matrix_otus = pd.read_csv('Anexos16S/unifrac_matrix_16S_ASVs.txt', sep = '\t')
+    id_samples_ASVs = frame_matrix_otus.Sample.tolist()
+    unifrac_matrix_ASVs = frame_matrix_otus.iloc[:, 1:].values
+else:
+    A=urllib.request.urlretrieve('https://raw.githubusercontent.com/eduardo1011/Bioinformatica2019/master/unifrac_matrix_16S_ASVs.txt',
+                            'Anexos16S/unifrac_matrix_16S_ASVs.txt')
+
+    frame_matrix_otus = pd.read_csv('Anexos16S/unifrac_matrix_16S_ASVs.txt', sep = '\t')
+    id_samples_ASVs = frame_matrix_otus.Sample.tolist()
+    unifrac_matrix_ASVs = frame_matrix_otus.iloc[:, 1:].values
+
+
 #### 'OTU':
 DATAFRAME_PHYLOGENETIC_OTUs = pd.read_csv('Anexos16S/OTUs_Phylogenetic_Tree.tsv', sep = '\t')
 DATAFRAME_PHYLOGENETIC_OTUs = DATAFRAME_PHYLOGENETIC_OTUs.set_index('#OTU ID')
 N_Cols_OTUs = list(DATAFRAME_PHYLOGENETIC_OTUs.columns)
-arboll_OTUs = open('Anexos16S/clustal_OTUs_Tree.txt', 'r')
-arbol_OTUs = arboll_OTUs.read()
-arboll_OTUs.close()
-arbol_OTUs = ''.join(arbol_OTUs.split('\n'))
-newick_tree_OTUs = StringIO(arbol_OTUs)
-tree_OTUs = TreeNode.read(newick_tree_OTUs)
-tree_OTUs = tree_OTUs.root_at_midpoint()
-DisMat2_OTUs, unifrac_matrix_OTUs, id_samples_OTUs = table_to_distances2(DATAFRAME_PHYLOGENETIC_OTUs,
-                                                                         tree_OTUs, unweighted_unifrac)
+
+if os.path.exists('Anexos16S/unifrac_matrix_16S_OTUs.txt') == True:
+    frame_matrix_otus = pd.read_csv('Anexos16S/unifrac_matrix_16S_OTUs.txt', sep = '\t')
+    id_samples_OTUs = frame_matrix_otus.Sample.tolist()
+    unifrac_matrix_OTUs = frame_matrix_otus.iloc[:, 1:].values
+else:
+    A=urllib.request.urlretrieve('https://raw.githubusercontent.com/eduardo1011/Bioinformatica2019/master/unifrac_matrix_16S_OTUs.txt',
+                            'Anexos16S/unifrac_matrix_16S_OTUs.txt')
+
+    frame_matrix_otus = pd.read_csv('Anexos16S/unifrac_matrix_16S_OTUs.txt', sep = '\t')
+    id_samples_OTUs = frame_matrix_otus.Sample.tolist()
+    unifrac_matrix_OTUs = frame_matrix_otus.iloc[:, 1:].values
 
 
 
@@ -2801,7 +3013,7 @@ def plot_pca3(dpca3 = 'ASV', variable = 'Coffee_Variety', CoLoR = 'tab10',
             id_samples = id_samples_ASVs
             unifrac_matrix_condensed_ASVs = squareform(unifrac_matrix_ASVs, force='tovector', checks=False)
             WWW = average(unifrac_matrix_condensed_ASVs)
-            DisMat2 = DisMat2_ASVs
+            DisMat2 = unifrac_matrix_ASVs
             
         elif dpca3 == 'OTU':
             UniFracDF = DataFrame(unifrac_matrix_OTUs, columns = id_samples_OTUs)
@@ -2811,11 +3023,11 @@ def plot_pca3(dpca3 = 'ASV', variable = 'Coffee_Variety', CoLoR = 'tab10',
             id_samples = id_samples_OTUs
             unifrac_matrix_condensed_OTUs = squareform(unifrac_matrix_OTUs, force='tovector', checks=False)
             WWW = average(unifrac_matrix_condensed_OTUs)
-            DisMat2 = DisMat2_OTUs
+            DisMat2 = unifrac_matrix_OTUs
         
 
-        SAMple = Sampledata
-        SAMple =SAMple.set_index('Sample')
+        SAMple = DataFrame(id_samples, columns = ['Sample']).merge(Sampledata, on = 'Sample', how = 'left')
+        SAMple =SAMple.set_index('Sample'))
 
         
 
