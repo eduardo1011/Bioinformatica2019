@@ -23,6 +23,7 @@ from scipy.cluster.hierarchy import dendrogram, linkage, _plot_dendrogram, avera
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib.colors import to_rgba_array, to_rgba, to_hex
 from matplotlib import cm
 import matplotlib
 import warnings
@@ -104,6 +105,11 @@ from tkinter import *
 
 
 def RampaS(list_color = list()):
+
+    import ctypes
+    
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+
     mpl.rcParams.update(mpl.rcParamsDefault)
     gradient = np.linspace(0, 1, 256)
     gradient = np.vstack((gradient, gradient))
@@ -148,42 +154,6 @@ metricas = ['euclidean','braycurtis','canberra','chebyshev','cityblock','correla
 metodos = ['complete','single','average','weighted','centroid','ward']
 
 
-
-sampledata = """
-Sample	Coffee_Variety	Processing	Cultivation	Time_Dry	Kit	OTA
-1R0	Robusta	Dry	Conventional	0	DPS	1.25
-2R3	Robusta	Dry	Conventional	3	DPS	0.70
-3R8	Robusta	Dry	Conventional	8	DPS	0.74
-4R10	Robusta	Dry	Conventional	10	DPS	3.11
-5A0	Arabica	Dry	Conventional	0	DPS	0.86
-6A6	Arabica	Dry	Conventional	6	DPS	0.70
-7A15	Arabica	Dry	Conventional	15	DPS	15.83
-8A0G	Arabica	Wet	Organic	0	DPS	3.19
-9A3G	Arabica	Wet	Organic	3	DPS	0.64
-10A7G	Arabica	Wet	Organic	7	DPS	0.00
-11C0	Arabica	Wet	Conventional	0	DPS	0.73
-12C3	Arabica	Wet	Conventional	3	DPS	0.00
-13C7	Arabica	Wet	Conventional	7	DPS	0.59
-140G	Arabica	Wet	Organic	0	DUCM	3.19
-153G	Arabica	Wet	Organic	3	DUCM	0.64
-167G	Arabica	Wet	Organic	7	DUCM	0.00
-17R0	Robusta	Dry	Conventional	0	DUCM	1.25
-18R3	Robusta	Dry	Conventional	3	DUCM	0.70
-19R8	Robusta	Dry	Conventional	8	DUCM	0.74
-20R10	Robusta	Dry	Conventional	10	DUCM	3.11
-21A0	Arabica	Dry	Conventional	0	DUCM	0.86
-22A6	Arabica	Dry	Conventional	6	DUCM	0.70
-23A15	Arabica	Dry	Conventional	15	DUCM	15.83
-240C	Arabica	Wet	Conventional	0	DUCM	0.73
-253C	Arabica	Wet	Conventional	3	DUCM	0.00
-267C	Arabica	Wet	Conventional	7	DUCM	0.59
-"""
-
-Sampledata = pd.read_csv(StringIO(sampledata), sep='\t')
-Sampledata['Time_Dry'] = [str(i) for i in Sampledata.Time_Dry]
-Sampledata['OTA'] = [str(i) for i in Sampledata.OTA]
-
-variables = list(Sampledata.iloc[:, 1:].columns)
 
 def merge_tabla(DF = DataFrame([]),
                 varcol=QUALITATIVE_colors['Pastel1'],
@@ -289,6 +259,54 @@ for TAX in ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']:
 
 
 
+sampledata = """
+Sample	Coffee_Variety	Processing	Cultivation	Time_Dry	Kit	OTA
+1R0	Robusta	Dry	Conventional	0	DPS	1.25
+2R3	Robusta	Dry	Conventional	3	DPS	0.70
+3R8	Robusta	Dry	Conventional	8	DPS	0.74
+4R10	Robusta	Dry	Conventional	10	DPS	3.11
+5A0	Arabica	Dry	Conventional	0	DPS	0.86
+6A6	Arabica	Dry	Conventional	6	DPS	0.70
+7A15	Arabica	Dry	Conventional	15	DPS	15.83
+8A0G	Arabica	Wet	Organic	0	DPS	3.19
+9A3G	Arabica	Wet	Organic	3	DPS	0.64
+10A7G	Arabica	Wet	Organic	7	DPS	0.00
+11C0	Arabica	Wet	Conventional	0	DPS	0.73
+12C3	Arabica	Wet	Conventional	3	DPS	0.00
+13C7	Arabica	Wet	Conventional	7	DPS	0.59
+140G	Arabica	Wet	Organic	0	DUCM	3.19
+153G	Arabica	Wet	Organic	3	DUCM	0.64
+167G	Arabica	Wet	Organic	7	DUCM	0.00
+17R0	Robusta	Dry	Conventional	0	DUCM	1.25
+18R3	Robusta	Dry	Conventional	3	DUCM	0.70
+19R8	Robusta	Dry	Conventional	8	DUCM	0.74
+20R10	Robusta	Dry	Conventional	10	DUCM	3.11
+21A0	Arabica	Dry	Conventional	0	DUCM	0.86
+22A6	Arabica	Dry	Conventional	6	DUCM	0.70
+23A15	Arabica	Dry	Conventional	15	DUCM	15.83
+240C	Arabica	Wet	Conventional	0	DUCM	0.73
+253C	Arabica	Wet	Conventional	3	DUCM	0.00
+267C	Arabica	Wet	Conventional	7	DUCM	0.59
+"""
+
+Sampledata = pd.read_csv(StringIO(sampledata), sep='\t')
+Sampledata['Time_Dry'] = [str(i) for i in Sampledata.Time_Dry]
+Sampledata['OTA'] = [str(i) for i in Sampledata.OTA]
+
+Sampledata = DataFrame(list(ordenado3.values()), columns = ['Sample']).merge(Sampledata, on = 'Sample', how = 'left')
+
+variables = list(Sampledata.iloc[:, 1:].columns)
+
+
+import matplotlib.patches as mpatches
+def fraccion(u):
+    u = np.asarray(u, np.float32)
+    if u.ndim != 1 and u.squeeze().ndim <= 1:
+        u = np.atleast_1d(x.squeeze())
+    su = u.sum()
+    if su > 1:
+        u = u / su
+    return u
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -298,7 +316,7 @@ for TAX in ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']:
 
 def update_plot(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_metadata = True,
                rampa = 'tab20', etiqueta = '', umbral = '', orientacion = 'HBar',
-               png = False, svg = False):
+               png = False, svg = False, XXXXXXXXX = 'Both'):
     
     mpl.rcParams.update(mpl.rcParamsDefault)
     ########################## archivos
@@ -345,77 +363,189 @@ def update_plot(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_met
     unicos2 = [str(x) for x in sorted([float(i) for i in ota])]
     ota = dict(zip(unicos2, [ota[j] for j in unicos2]))
     
+    TUPLAS = {}
+    for i in sumary2.index:
+        tupla = tuple(sumary2[sumary2.index == i].values[0])
+        TUPLAS[i] = tupla
+    
+    mpl.rcParams.update(mpl.rcParamsDefault)
+
     ancho_barra = 0.8
     
     ##########################
 
 
     if orientacion == 'VBar':
+
+            #--------------------
+        if XXXXXXXXX in ('Both', 'No_Kit'):
+            CUADRO = 0.7
+            CuadrO2 = 0.55
+
+        if XXXXXXXXX in ('DUCM', 'DPS'):
+            CUADRO = 0.5
+            CuadrO2 = 0.4
+ 
+        denx2pos = 0
         if [mostrar_dendrograma, mostrar_circulos, mostrar_metadata] == [False, False, False]:
-            mpl.rcParams.update(mpl.rcParamsDefault)
+            
+            if XXXXXXXXX in ('Both', 'No_Kit'):
+                
+                fig = plt.figure()
+                
+                ax1 = fig.add_axes([denx2pos+0.005, 0, CUADRO, CUADRO])
 
-            fig = plt.figure()
+                level = dict(zip(list(sumary2.columns), QUALITATIVE_colors[rampa]))
 
-            CUADRO = 0.8
-            denx2pos = 0
+                category_names = ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']
+                labels = list(TUPLAS.keys())
+                data = np.array(list(TUPLAS.values()))
+                data_cum = data.cumsum(axis=1)
+                for i, colname in enumerate(category_names):
+                    widths = data[:, i]
+                    starts = data_cum[:, i] - widths
+                    ax1.bar(labels, widths, bottom=starts, color = level[colname], linewidth = 0.2, label=colname,
+                           edgecolor = 'white')
 
-            ax1 = fig.add_axes([denx2pos+0.005, 0, CUADRO, CUADRO])
+                for d in [25, 50, 75]:
+                    Lista = list(range(-1, len(sumary2)))
+                    plt.plot(np.array(Lista+[Lista[-1]+0.5]),np.repeat(d, len(sumary2)+2), 
+                             marker='o', markeredgewidth=0, zorder=0, linestyle='-',
+                                         markersize=0, color='black', linewidth=0.3, alpha = 1)
 
-            sumary2.plot(kind='bar', stacked=True, figsize=(4+0.5, 4), width= ancho_barra,
-                                     color = QUALITATIVE_colors[rampa], alpha = 0.7, ax = ax1)
+                plt.xticks(size=8, rotation=90, ha = 'center')
+                plt.yticks([25, 50, 75, 100], ['25', '50', '75', '100'], size=7)
 
-            plt.xticks(size=8, rotation=90, ha = 'right')
-            plt.yticks([25, 50, 75, 100], ['25', '50', '75', '100'], size=7)
 
-            for d in [25, 50, 75]:
-                plt.plot(np.array(range(-1, len(sumary2)+1)),np.repeat(d, len(sumary2)+2), 
-                         marker='o', markeredgewidth=0, zorder=0, linestyle='-',
-                                     markersize=0, color='black', linewidth=0.3, alpha = 1)
+                ax1.tick_params(bottom=False, right=False, top=False, left=True, width = 0.3, length=2, color='black')
+                ax1.spines['left'].set_linewidth(0.3)
+                ax1.spines['bottom'].set_linewidth(0.2)
+                ax1.spines['left'].set_color('black')
+                ax1.spines['bottom'].set_color('black')
+                ax1.spines['right'].set_color(None)
+                ax1.spines['bottom'].set_color(None)
+                ax1.spines['top'].set_color(None)
+                ax1.spines['top'].set_linewidth(0.2)
+                ax1.spines['top'].set_linewidth(0.3)
 
-            plt.setp(ax1.get_legend().get_title(), fontweight='bold')
-            plt.setp(ax1.get_legend().get_texts(), fontsize='8')
-            ax1.tick_params(bottom=True, right=False, top=False, left=True, width = 0.3, length=2, color='black')
-            ax1.spines['left'].set_linewidth(0.3)
-            ax1.spines['bottom'].set_linewidth(0.2)
-            ax1.spines['left'].set_color('black')
-            ax1.spines['bottom'].set_color('black')
-            ax1.spines['right'].set_color(None)
-            ax1.spines['top'].set_color(None)
-            ax1.spines['top'].set_linewidth(0.2)
-            ax1.spines['top'].set_linewidth(0.3)
 
-            ax1.set_ylabel('Relative abundance (%)', fontsize=8)
-            ax1.set_xlabel('', fontsize=0)
+                ax1.set_ylabel('Relative abundance (%)', fontsize=8)
+                ax1.set_xlabel('', fontsize=0)
 
-            ax1.legend(title='Level', title_fontsize = 8,  bbox_to_anchor=(1, 0.98), loc=2, ncol = 1,
-                       handletextpad=0.5,
-                       fancybox=True, framealpha=0.5, shadow=False,
-                       handlelength = .7, labelspacing = 0.5, columnspacing = 1,
-                       borderpad = 0.5, edgecolor="gainsboro", #frameon=False,
-                       prop={'size':7})
+                ax1.legend(title='Level', title_fontsize = 8,  bbox_to_anchor=(0.99, 1.01), loc=2, ncol = 1,
+                           handletextpad=0.5,
+                           fancybox=True, framealpha=0.5, shadow=False,
+                           handlelength = .7, labelspacing = 0.5, columnspacing = 1,
+                           borderpad = 0.5, edgecolor="gainsboro", #frameon=False,
+                           prop={'size':7})
 
-            if png == True:
-                plt.savefig('Plots16S/'+etiqueta+'_Global_Taxonomic_Level_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
-            if svg == True:
-                plt.savefig('Plots16S/'+etiqueta+'_Global_Taxonomic_Level_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
-            plt.show()
+                ax1.set_ylim(0,100)
+                ax1.set_xlim(-0.5,len(sumary2))
+                
+                if png == True:
+                    plt.savefig('Plots16S/'+etiqueta+'_Global_Taxonomic_Level_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
+                if svg == True:
+                    plt.savefig('Plots16S/'+etiqueta+'_Global_Taxonomic_Level_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
+                
+                plt.show()
+                
+                
+            if XXXXXXXXX in ('DUCM', 'DPS'):
+                
+                fig = plt.figure()
+                
+                ax1 = fig.add_axes([denx2pos+0.005, 0, CuadrO2, CUADRO])
+
+                level = dict(zip(list(sumary2.columns), QUALITATIVE_colors[rampa]))
+
+                category_names = ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']
+                labels = list(TUPLAS.keys())
+                data = np.array(list(TUPLAS.values()))
+                data_cum = data.cumsum(axis=1)
+                for i, colname in enumerate(category_names):
+                    widths = data[:, i]
+                    starts = data_cum[:, i] - widths
+                    ax1.bar(labels, widths, bottom=starts, color = level[colname], linewidth = 0.2, label=colname,
+                           edgecolor = 'white')
+
+                for d in [25, 50, 75]:
+                    Lista = list(range(-1, len(sumary2)))
+                    plt.plot(np.array(Lista+[Lista[-1]+0.5]),np.repeat(d, len(sumary2)+2), 
+                             marker='o', markeredgewidth=0, zorder=0, linestyle='-',
+                                         markersize=0, color='black', linewidth=0.3, alpha = 1)
+
+                plt.xticks(size=8, rotation=90, ha = 'center')
+                plt.yticks([25, 50, 75, 100], ['25', '50', '75', '100'], size=7)
+
+
+                ax1.tick_params(bottom=False, right=False, top=False, left=True, width = 0.3, length=2, color='black')
+                ax1.spines['left'].set_linewidth(0.3)
+                ax1.spines['bottom'].set_linewidth(0.2)
+                ax1.spines['left'].set_color('black')
+                ax1.spines['bottom'].set_color('black')
+                ax1.spines['right'].set_color(None)
+                ax1.spines['top'].set_color(None)
+                ax1.spines['top'].set_linewidth(0.2)
+                ax1.spines['top'].set_linewidth(0.3)
+
+
+                ax1.set_ylabel('Relative abundance (%)', fontsize=8)
+                ax1.set_xlabel('', fontsize=0)
+
+                ax1.legend(title='Level', title_fontsize = 8,  bbox_to_anchor=(0.99, 1.01), loc=2, ncol = 1,
+                           handletextpad=0.5,
+                           fancybox=True, framealpha=0.5, shadow=False,
+                           handlelength = .7, labelspacing = 0.5, columnspacing = 1,
+                           borderpad = 0.5, edgecolor="gainsboro", #frameon=False,
+                           prop={'size':7})
+
+                ax1.set_ylim(0,100)
+                ax1.set_xlim(-0.5,len(sumary2))
+                
+                if png == True:
+                    plt.savefig('Plots16S/'+etiqueta+'_Global_Taxonomic_Level_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
+                if svg == True:
+                    plt.savefig('Plots16S/'+etiqueta+'_Global_Taxonomic_Level_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
+                
+                plt.show()
         else:
-            print('To show the vertical graph you have to disable:\nDendrogram, Pie Plots and Metadata')
+            print('To show the vertical graph you have to disable:\nDendrogram, Pie Plots and Metadata.')
+            print('Metadata only applies to HBar.')
             
     if orientacion == 'HBar':
     
         mpl.rcParams.update(mpl.rcParamsDefault)
 
-        fig = plt.figure()
+        #--------------------
+        if XXXXXXXXX in ('Both', 'No_Kit'):
+            CUADRO = 0.7
+            CuadrO2 = 0.55
+            agregado = 4.5
+            PUNTO = 67
+            radio = 2.1
+            xlim = 110
+            sepp = 0.9
+            yini00 = 29
+            explotado = 0.1
+        if XXXXXXXXX in ('DUCM', 'DPS'):
+            CUADRO = 0.5
+            CuadrO2 = 0.4
+            agregado = 6
+            PUNTO = 85
+            radio = 2.8
+            xlim = 80
+            sepp = 0.62
+            yini00 = 34
+            explotado = 0.1
 
-        CUADRO = 0.8
         denx2pos = 0
+        fig = plt.figure()
         #########################################################################
         ################   dendrograma       ########################
         #########################################################################
         if mostrar_dendrograma == True:
-            denx2pos = 0.25
-            ax0 = fig.add_axes([0, 0.005, denx2pos, CUADRO-0.0105])
+            denx2pos = 0.15
+            ax0 = fig.add_axes([0, 0, denx2pos, CUADRO])
 
             ax0.set_facecolor('none')
 
@@ -431,149 +561,228 @@ def update_plot(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_met
                                  no_labels, color_list, leaf_font_size=None,
                                  leaf_rotation=None, contraction_marks=None,
                                  ax=ax0)
+            ax0.set_xlim(mh+(mh*0.1), 0)
+            ax0.set_ylim(0,(len(sumary2) * 10))
 
             ax0.axis('off')
 
         #########################################################################
         ##################     stacked      ###########################
         #########################################################################
+        ax1 = fig.add_axes([denx2pos+0.005, 0, CuadrO2, CUADRO])
 
-        ax1 = fig.add_axes([denx2pos+0.005, 0, CUADRO, CUADRO])
+        level = dict(zip(list(sumary2.columns), QUALITATIVE_colors[rampa]))
 
-        sumary2.plot(kind='barh', stacked=True, figsize=(4+0.5, 4), width=0.8,
-                                 color = QUALITATIVE_colors[rampa], alpha = 0.7, ax = ax1)
+        category_names = ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']
+        labels = list(TUPLAS.keys())
+        data = np.array(list(TUPLAS.values()))
+        data_cum = data.cumsum(axis=1)
+        for i, colname in enumerate(category_names):
+            widths = data[:, i]
+            starts = data_cum[:, i] - widths
+            ax1.barh(labels, widths, left=starts, height=0.8, color = level[colname], linewidth = 0.2, label=colname,
+                    edgecolor = 'white')
 
         for d in [25, 50, 75]:
-            plt.plot(np.repeat(d, len(sumary2)+2),np.array(range(-1, len(sumary2)+1)), 
+            Lista = list(range(-1, len(sumary2)))
+            plt.plot(np.repeat(d, len(sumary2)+2),np.array(Lista+[Lista[-1]+0.5]), 
                      marker='o', markeredgewidth=0, zorder=0, linestyle='-',
                                  markersize=0, color='black', linewidth=0.3, alpha = 1)
 
         plt.yticks(size=8, rotation=0, ha = 'right', fontweight='bold')
         plt.xticks([25, 50, 75, 100], ['25', '50', '75', '100'], size=7)
 
-        for enu, lab in enumerate(ax1.get_yticklabels()):
-            ax1.text(101, enu, lab.get_text(), va = 'center', ha = 'left', fontsize=7)
-            #print(enu, lab.get_text())
+        for enu, lab in enumerate(sumary2.index):
+            ax1.text(101, enu, lab, va = 'center', ha = 'left', fontsize=7)
 
-        plt.setp(ax1.get_legend().get_title(), fontweight='bold')
-        plt.setp(ax1.get_legend().get_texts(), fontsize='8')
+
         plt.gca().tick_params(bottom=True, right=False, top=False, left=False, width = 0.3, length=2, color='black')
         plt.gca().spines['left'].set_linewidth(0.3)
         plt.gca().spines['bottom'].set_linewidth(0.2)
         plt.gca().spines['left'].set_color(None)
         plt.gca().spines['bottom'].set_color('black')
         plt.gca().spines['right'].set_color(None)
-        #plt.gca().spines['top'].set_color(None)
-        plt.gca().spines['top'].set_linewidth(0.3)
-        plt.gca().spines['top'].set_linewidth(0.2)
+        plt.gca().spines['top'].set_color(None)
+
+        #plt.gca().spines['top'].set_linewidth(0.3)
+        #plt.gca().spines['top'].set_linewidth(0.2)
 
         ax1.set_ylabel('', fontsize=0)
         ax1.set_xlabel('Relative abundance (%)', fontsize=8)
         ax1.set_yticklabels('', fontsize=0)
-        ax1.get_legend().set_visible(False)
+
+
+        ax1.set_xlim(0,100)
+        ax1.set_ylim(-0.5,len(sumary2)-0.5)
+        
+        if XXXXXXXXX == 'Both':
+            XLabelout = 1.77
+        if XXXXXXXXX == 'No_Kit':
+            XLabelout = 1.73
+        if XXXXXXXXX in ('DUCM', 'DPS'):
+            XLabelout = 1.93
+        
+        ax1.legend(title= 'Level', title_fontsize = 6,  bbox_to_anchor=(XLabelout, 1.02), loc = 2, ncol = 1,
+                   handletextpad=0.5,
+                   fancybox=True, framealpha=0.5, shadow=False,
+                   handlelength = .7, labelspacing = 0.5, columnspacing = 1,
+                   borderpad = 0.5, edgecolor="gainsboro", #frameon=False,
+                   prop={'size':6})
 
         #########################################################################
         ####################     circles       ######################
         #########################################################################
         if mostrar_circulos == True:
-            ax2 = fig.add_axes([denx2pos+0.005, CUADRO+0.01, CUADRO, 0.2])
+            aec = 0.25 # alto_espacio_circulos
+            ax2 = fig.add_axes([denx2pos+0.005, CUADRO, CuadrO2, 0.25])
             ax2.set_facecolor('none')
 
             sample_ordenado0 = list(sumary2.index)
             sample_ordenado0 = list(reversed(sample_ordenado0))
-            cuadros = CUADRO/len(sample_ordenado0)
+            cuadros = CUADRO/len(sumary2)
 
-            inicio = denx2pos+0.005
-            inicioy = CUADRO+0.01 + (cuadros * 5)
-            for u in sample_ordenado0:
-                ax222 = plt.axes([inicio, inicioy, cuadros, cuadros])
 
-                ax222.text(0, 0, '   '+u, fontsize=7, color = 'black', ha='center',
-                                            va = 'bottom', rotation=90)
-                for i, k in zip(ssss[u], [QUALITATIVE_colors[rampa][i] for i, j in enumerate(list(sumary2.columns))]):
+            ax2.set_xlim(0,xlim)
+            ax2.set_ylim(-0.5,38-0.5)
 
-                    ax22 = plt.axes([inicio, inicioy, cuadros, cuadros])
 
-                    ax22.pie([ssss[u][i][0], ssss[u][i][1]], #autopct ='%1.1f%%',
-                            pctdistance = 0.5, labeldistance= 1,
-                            startangle = 0, radius = 1.1, rotatelabels = False,
-                            colors = [k,'silver'],
-                            wedgeprops={'alpha':1, 'linewidth': 0, 'edgecolor':'black'},
-                            explode = np.array([0.05, 0.05]), textprops=dict(size = 0))
-                    centre_circle = plt.Circle((0,0),0.2,fc = 'white')
+            
+            teta1 = 0
+            ancho_circulo = 80
+            factor = xlim/len(sumary2)
+            yini = yini00
+            for r0 in ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']:
+                ax2.text(0, yini, r0+' ', ha = 'right', va = 'center', fontsize = 7)
+                xini = factor
+                for r1 in sample_ordenado0:
+                    centro = (xini-(factor/2), yini)
+                    Frac = fraccion(ssss[r1][r0])
+                    explode = [explotado] * len(Frac)
+                    num = 0
+                    for frac, expl in zip(Frac, explode):
+                        if num == 0:
+                            nivelcolor = level[r0]
+                        else:
+                            nivelcolor = 'silver'
+                        x, y = centro
+                        teta2 = (teta1 + frac)
+                        thetam = 2 * np.pi * 0.5 * (teta1 + teta2)
+                        x += expl * np.cos(thetam)
+                        y += expl * np.sin(thetam)
+                        w = mpatches.Wedge((x, y), radio, 360. * min(teta1, teta2),
+                                                   360. * max(teta1, teta2),
+                                           width=radio*(ancho_circulo/100),
+                                                   facecolor=nivelcolor)
+                        ax2.add_patch(w)
+                        teta1 = teta2
+                        num += 1
 
-                    plt.gca().add_artist(centre_circle)
-                    inicioy -= cuadros
+                    xini += factor
+                if XXXXXXXXX in ('Both', 'No_Kit'):
+                    yini -= 5.1
+                if XXXXXXXXX in ('DUCM', 'DPS'):
+                    yini -= 6.1
 
-                inicio += cuadros
-                inicioy = CUADRO+0.01 + (cuadros * 5)
-
-            inicioy2 = CUADRO-0.05 + (cuadros * 5)
-            for ta in ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']:
-                ax2.text(0, inicioy2, ta+' ', fontsize=7, color = 'black', ha='right',
-                         va = 'center', rotation=0)
-                inicioy2 -= 0.17
+            xini = factor
+            for r1 in sample_ordenado0:
+                ax2.text(xini-(factor/2), yini00, '    '+r1, ha = 'center', va = 'bottom', fontsize = 7, rotation = 90)
+                xini += factor
 
             ax2.axis('off')
+
         #########################################################################
         #####################       metadata       ########################
-        #########################################################################
+        #########################################################################    
         if mostrar_metadata == True:
-            ax3 = fig.add_axes([(CUADRO)+(denx2pos)+0.045, -0.015, 0.5, CUADRO+0.0415])
+            xlim2 = 100
+            ax3 = fig.add_axes([(CuadrO2)+(denx2pos)+0.062, 0, (xlim2*CuadrO2)/100, CUADRO])
             ax3.set_facecolor('none')
-            ax3.set_xlim(0, 65)
+            ax3.set_xlim(0,xlim2)
+            ax3.set_ylim(-0.5,len(sumary2)-0.5)
 
-            level = dict(zip(list(sumary2.columns), QUALITATIVE_colors[rampa]))
 
-            PUNTO = 50
-            inicio = 3
+            inicio = 4
             y_inicio = 0
-            agregado = 3.7
-            posiciones = []
+            yposiciones = []
             for index, row in names1[['Sample', 'Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'Kit', 'OTA']].drop_duplicates().iterrows():
                 ax3.scatter(inicio, y_inicio, s = PUNTO * ancho_barra, c = variedad[row.Coffee_Variety])
                 ax3.scatter(inicio + (agregado),y_inicio, s = PUNTO, c = procesado[row.Processing])
                 ax3.scatter(inicio + (agregado*2),y_inicio, s = PUNTO, c = cultivo[row.Cultivation])
                 ax3.scatter(inicio + (agregado*3),y_inicio, s = PUNTO, c = tiempo_secado[row.Time_Dry])
-                ax3.scatter(inicio + (agregado*4),y_inicio, s = PUNTO, c = kit[row.Kit])
-                ax3.scatter(inicio + (agregado*5),y_inicio, s = PUNTO, c = ota[row.OTA])
-                posiciones.append(y_inicio)
+                if XXXXXXXXX == 'Both':
+                    ax3.scatter(inicio + (agregado*4),y_inicio, s = PUNTO, c = ota[row.OTA])
+                    ax3.scatter(inicio + (agregado*5),y_inicio, s = PUNTO, c = kit[row.Kit])
+                    xposicionfinal = inicio + (agregado*5)
+                if XXXXXXXXX == 'No_Kit':
+                    ax3.scatter(inicio + (agregado*4),y_inicio, s = PUNTO, c = ota[row.OTA])
+                    xposicionfinal = inicio + (agregado*4)
+                if XXXXXXXXX in ('DUCM', 'DPS'):
+                    ax3.scatter(inicio + (agregado*4),y_inicio, s = PUNTO, c = ota[row.OTA])
+                    xposicionfinal = inicio + (agregado*4)
                 y_inicio += 1
+                yposiciones.append(y_inicio)
 
-            agre = [0, 1, 2, 3, 4, 5]
-            agregado = 3.7
-            for ag, VaR in zip(agre, ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'Kit', 'OTA']):
-                ax3.text(inicio + (agregado*ag), y_inicio-0.3, VaR, fontsize=6, color = 'black', ha='center',
-                                            va = 'bottom', rotation=90)
-            xpos = inicio + (agregado*6.2)
-            pos = max(list(reversed(posiciones)))
-            for i, u in zip([level, variedad, procesado, cultivo, tiempo_secado],
-                            ['Level', 'Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry']):
+
+            if XXXXXXXXX == 'Both':
+                inicio = 4
+                for VaR in ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'OTA', 'Kit']:
+                    ax3.text(inicio, y_inicio-0.25, VaR, fontsize=6, color = 'black', ha='center',
+                                                va = 'bottom', rotation=90)
+                    inicio += agregado
+            if XXXXXXXXX == 'No_Kit':
+                inicio = 4
+                for VaR in ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'OTA']:
+                    ax3.text(inicio, y_inicio-0.25, VaR, fontsize=6, color = 'black', ha='center',
+                                                va = 'bottom', rotation=90)
+                    inicio += agregado
+            if XXXXXXXXX in ('DUCM', 'DPS'):
+                inicio = 4
+                for VaR in ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'OTA']:
+                    ax3.text(inicio, y_inicio-0.5, VaR, fontsize=6, color = 'black', ha='center',
+                                                va = 'bottom', rotation=90)
+                    inicio += agregado
+
+
+            xpos = xposicionfinal + agregado
+            pos = max(list(reversed(yposiciones)))-0.5
+            for i, u in zip([variedad, procesado, cultivo, tiempo_secado],
+                            ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry']):
                 ax3.text(xpos, pos, u, fontsize=6, color = 'black', ha='left',
                                 va = 'center', weight='bold')
-                pos -= 1
+                pos -= sepp
                 for j in i:
-                    if j in ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']:
-                        ax3.scatter(xpos+1, pos, s = 13, c = i[j], marker = 's')
-                    else:
-                        ax3.scatter(xpos+1, pos, s = 20, c = i[j], marker = 'o')
+                    ax3.scatter(xpos+1, pos, s = 20, c = i[j], marker = 'o')
                     ax3.text(xpos+4, pos, j, fontsize=6, color = 'black', ha='left', va = 'center')
-                    pos -= 1
+                    pos -= sepp
 
-            xpos2 = inicio + (agregado*12.5)
-            pos2 = max(list(reversed(posiciones)))
-            for i, u in zip([kit, ota], ['Kit', 'OTA']):
-                ax3.text(xpos2, pos2, u, fontsize=6, color = 'black', ha='left',
-                        va = 'center', weight='bold')
-                pos2 -= 1
-                for j in i:
-                    ax3.scatter(xpos2+1, pos2, s = 20, c = i[j], marker = 'o')
-                    ax3.text(xpos2+4, pos2, j, fontsize=6, color = 'black', ha='left', va = 'center')
-                    pos2 -= 1
+            if XXXXXXXXX == 'Both':
+                xpos2 = xpos + agregado*5
+                pos2 = max(list(reversed(yposiciones)))-0.5
+                for i, u in zip([ota, kit], ['OTA', 'Kit']):
+                    ax3.text(xpos2, pos2, u, fontsize=6, color = 'black', ha='left',
+                            va = 'center', weight='bold')
+                    pos2 -= sepp
+                    for j in i:
+                        ax3.scatter(xpos2+1, pos2, s = 20, c = i[j], marker = 'o')
+                        ax3.text(xpos2+4, pos2, j, fontsize=6, color = 'black', ha='left', va = 'center')
+                        pos2 -= sepp
+            if XXXXXXXXX in ('No_Kit', 'DUCM', 'DPS'):
+                xpos2 = xpos + agregado*5
+                pos2 = max(list(reversed(yposiciones)))-0.5
+                for i, u in zip([ota], ['OTA']):
+                    ax3.text(xpos2, pos2, u, fontsize=6, color = 'black', ha='left',
+                            va = 'center', weight='bold')
+                    pos2 -= sepp
+                    for j in i:
+                        ax3.scatter(xpos2+1, pos2, s = 20, c = i[j], marker = 'o')
+                        ax3.text(xpos2+4, pos2, j, fontsize=6, color = 'black', ha='left', va = 'center')
+                        pos2 -= sepp
 
             ax3.axis('off')
+    
+    
         else:
-            ax1.legend(title='Level', title_fontsize = 8,  bbox_to_anchor=(1.07, 1.01), loc=2, ncol = 1,
+            ax1.legend(title='Level', title_fontsize = 8,  bbox_to_anchor=(1.131, 1.02), loc=2, ncol = 1,
                            handletextpad=0.5,
                            fancybox=True, framealpha=0.5, shadow=False,
                            handlelength = .7, labelspacing = 0.5, columnspacing = 1,
@@ -592,7 +801,7 @@ def update_plot(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_met
 
 def update_plot2(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_metadata = True,
                         orientacion = 'HBar', rampa = 'tab20', etiqueta = '', umbral = '', NUCOL = 1, tax = '',
-                png = False, svg = False):
+                png = False, svg = False, YYYYYYYYY = 'Both'):
     
     mpl.rcParams.update(mpl.rcParamsDefault)
     ########################## archivos
@@ -638,35 +847,71 @@ def update_plot2(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_me
     ota = oooo[5]
     unicos2 = [str(x) for x in sorted([float(i) for i in ota])]
     ota = dict(zip(unicos2, [ota[j] for j in unicos2]))
+
+    from matplotlib.colors import to_rgba_array, to_rgba, to_hex
+
+    TUPLAS2 = {}
+    for i in sumary2.index:
+        tupla = tuple(sumary2[sumary2.index == i].values[0])
+        TUPLAS2[i] = tupla
+
+    rangonumeros = np.arange(len(sumary2.columns))
+    serie = dict(zip(sumary2.columns, rangonumeros))
+
+    cnorm = mpl.colors.Normalize(vmin=min(list(serie.values())), vmax=max(list(serie.values())))
+    cpick = cm.ScalarMappable(norm=cnorm, cmap=rampa)
+
+    cpick.set_array([])
+    val_map = {}
+    for k, v in zip(list(serie.keys()), list(serie.values())):
+        val_map[k] = cpick.to_rgba(v)
+    colors = [] # rgb
+    colors2 = {} # hex
+    for node in list(serie.keys()):
+        colors.append(val_map[node])
+        colors2[node] = to_hex(val_map[node])
     
     ancho_barra = 0.8
     
     ##########################
     if orientacion == 'VBar':
+
+        if YYYYYYYYY in ('Both', 'No_Kit'):
+            CUADRO = 0.7
+            CuadrO2 = 0.55
+
+        if YYYYYYYYY in ('DUCM', 'DPS'):
+            CUADRO = 0.5
+            CuadrO2 = 0.4
+            
+        denx2pos = 0
         if [mostrar_dendrograma, mostrar_circulos, mostrar_metadata] == [False, False, False]:
             mpl.rcParams.update(mpl.rcParamsDefault)
-
             fig = plt.figure()
-
-            CUADRO = 0.8
-            denx2pos = 0
-
+                
             ax1 = fig.add_axes([denx2pos+0.005, 0, CUADRO, CUADRO])
-
-            sumary2.plot(kind='bar', stacked=True, figsize=(4+0.5, 4), width= ancho_barra,
-                                     colormap = plt.get_cmap(rampa), alpha = 0.7, ax = ax1)
-
-            plt.xticks(size=8, rotation=90, ha = 'right')
-            plt.yticks([25, 50, 75, 100], ['25', '50', '75', '100'], size=7)
-
+                
+            category_names = list(sumary2.columns)
+            labels = list(TUPLAS2.keys())
+            data = np.array(list(TUPLAS2.values()))
+            data_cum = data.cumsum(axis=1)
+            for i, colname in enumerate(category_names):
+                widths = data[:, i]
+                starts = data_cum[:, i] - widths
+                ax1.bar(labels, widths, bottom=starts, color = colors2[colname], linewidth = 0.2, label=colname,
+                           edgecolor = 'white')
+                
             for d in [25, 50, 75]:
-                plt.plot(np.array(range(-1, len(sumary2)+1)),np.repeat(d, len(sumary2)+2), 
+                Lista = list(range(-1, len(sumary2)))
+                plt.plot(np.array(Lista+[Lista[-1]+0.5]),np.repeat(d, len(sumary2)+2), 
                          marker='o', markeredgewidth=0, zorder=0, linestyle='-',
                                      markersize=0, color='black', linewidth=0.3, alpha = 1)
+                
+            plt.xticks(size=8, rotation=90, ha = 'center')
+            plt.yticks([25, 50, 75, 100], ['25', '50', '75', '100'], size=7)
 
-            plt.setp(ax1.get_legend().get_title(), fontweight='bold')
-            plt.setp(ax1.get_legend().get_texts(), fontsize='8')
-            ax1.tick_params(bottom=True, right=False, top=False, left=True, width = 0.3, length=2, color='black')
+
+            ax1.tick_params(bottom=False, right=False, top=False, left=True, width = 0.3, length=2, color='black')
             ax1.spines['left'].set_linewidth(0.3)
             ax1.spines['bottom'].set_linewidth(0.2)
             ax1.spines['left'].set_color('black')
@@ -676,39 +921,65 @@ def update_plot2(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_me
             ax1.spines['top'].set_linewidth(0.2)
             ax1.spines['top'].set_linewidth(0.3)
 
+
             ax1.set_ylabel('Relative abundance (%)', fontsize=8)
             ax1.set_xlabel('', fontsize=0)
 
-            ax1.legend(title=tax, title_fontsize = 6,  bbox_to_anchor=(1, 0.97), loc=2, ncol = NUCOL,
+            ax1.legend(title=tax, title_fontsize = 8,  bbox_to_anchor=(0.99, 1.01), loc=2, ncol = NUCOL,
                        handletextpad=0.5,
                        fancybox=True, framealpha=0.5, shadow=False,
                        handlelength = .7, labelspacing = 0.5, columnspacing = 1,
                        borderpad = 0.5, edgecolor="gainsboro", #frameon=False,
-                       prop={'style':'italic', 'size':5})
-            
+                       prop={'style':'italic', 'size':7})
+
+            ax1.set_ylim(0,100)
+            ax1.set_xlim(-0.5,len(sumary2))
+                
             if png == True:
                 plt.savefig('Plots16S/'+etiqueta+'_Taxonomic_Level_'+tax+'_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
             if svg == True:
                 plt.savefig('Plots16S/'+etiqueta+'_Taxonomic_Level_'+tax+'_Stacked_VBar_'+umbral+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
             plt.show()
         else:
-            print('To show the vertical graph you have to disable:\nDendrogram, Pie Plots and Metadata')
+            print('To show the vertical graph you have to disable:\nDendrogram, Pie Plots and Metadata.')
+            print('Metadata only applies to HBar.')
             
             
     if orientacion == 'HBar':
         
         mpl.rcParams.update(mpl.rcParamsDefault)
 
-        fig = plt.figure()
+        if YYYYYYYYY in ('Both', 'No_Kit'):
+            CUADRO = 0.7
+            CuadrO2 = 0.55
+            agregado = 4.5
+            PUNTO = 67
+            radio = 1.9
+            xlim = 100
+            sepp = 0.9
+            yini00 = 29
+            explotado = 0.1
 
-        CUADRO = 0.8
+        if YYYYYYYYY in ('DUCM', 'DPS'):
+            CUADRO = 0.5
+            CuadrO2 = 0.4
+            agregado = 6
+            PUNTO = 85
+            radio = 4
+            xlim = 100
+            sepp = 0.6
+            yini00 = 34
+            explotado = 0.1
+
+        mpl.rcParams.update(mpl.rcParamsDefault)
         denx2pos = 0
+        fig = plt.figure()
         #########################################################################
         ################   dendrograma       ########################
         #########################################################################
         if mostrar_dendrograma == True:
-            denx2pos = 0.25
-            ax0 = fig.add_axes([0, 0.005, denx2pos, CUADRO-0.0105])
+            denx2pos = 0.15
+            ax0 = fig.add_axes([0, 0, denx2pos, CUADRO])
 
             ax0.set_facecolor('none')
 
@@ -724,6 +995,8 @@ def update_plot2(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_me
                                  no_labels, color_list, leaf_font_size=None,
                                  leaf_rotation=None, contraction_marks=None,
                                  ax=ax0)
+            ax0.set_xlim(mh+(mh*0.1), 0)
+            ax0.set_ylim(0,(len(sumary2) * 10))
 
             ax0.axis('off')
 
@@ -731,39 +1004,53 @@ def update_plot2(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_me
         ##################     stacked      ###########################
         #########################################################################
 
-        ax1 = fig.add_axes([denx2pos+0.005, 0, CUADRO, CUADRO])
+        ax1 = fig.add_axes([denx2pos+0.005, 0, CuadrO2, CUADRO])
 
-        sumary2.plot(kind='barh', stacked=True, figsize=(4+0.5, 4), width=0.8,
-                                 colormap = plt.get_cmap(rampa), alpha = 0.7, ax = ax1)
+
+        category_names = list(sumary2.columns)
+        labels = list(TUPLAS2.keys())
+        data = np.array(list(TUPLAS2.values()))
+        data_cum = data.cumsum(axis=1)
+        for i, colname in enumerate(category_names):
+            widths = data[:, i]
+            starts = data_cum[:, i] - widths
+            ax1.barh(labels, widths, left=starts, height=0.8, color = colors2[colname], linewidth = 0.2, label=colname,
+                    edgecolor = 'white')
 
         for d in [25, 50, 75]:
-            plt.plot(np.repeat(d, len(sumary2)+2),np.array(range(-1, len(sumary2)+1)), 
+            Lista = list(range(-1, len(sumary2)))
+            plt.plot(np.repeat(d, len(sumary2)+2),np.array(Lista+[Lista[-1]+0.5]), 
                      marker='o', markeredgewidth=0, zorder=0, linestyle='-',
                                  markersize=0, color='black', linewidth=0.3, alpha = 1)
 
-        plt.yticks(size=8, rotation=0, ha = 'right', fontweight='bold')
+        ax1.set_ylabel('', fontsize=0)
+        ax1.set_yticklabels('', fontsize=0)
         plt.xticks([25, 50, 75, 100], ['25', '50', '75', '100'], size=7)
 
-        for enu, lab in enumerate(ax1.get_yticklabels()):
-            ax1.text(101, enu, lab.get_text(), va = 'center', ha = 'left', fontsize=7)
-            #print(enu, lab.get_text())
+        for enu, lab in enumerate(sumary2.index):
+            ax1.text(101, enu, lab, va = 'center', ha = 'left', fontsize=7)
 
-        plt.setp(ax1.get_legend().get_title(), fontweight='bold')
-        plt.setp(ax1.get_legend().get_texts(), fontsize='8')
         plt.gca().tick_params(bottom=True, right=False, top=False, left=False, width = 0.3, length=2, color='black')
         plt.gca().spines['left'].set_linewidth(0.3)
         plt.gca().spines['bottom'].set_linewidth(0.2)
         plt.gca().spines['left'].set_color(None)
         plt.gca().spines['bottom'].set_color('black')
         plt.gca().spines['right'].set_color(None)
-        #plt.gca().spines['top'].set_color(None)
-        plt.gca().spines['top'].set_linewidth(0.3)
-        plt.gca().spines['top'].set_linewidth(0.2)
+        plt.gca().spines['top'].set_color(None)
 
-        ax1.set_ylabel('', fontsize=0)
+        ax1.set_xlim(0,100)
+        ax1.set_ylim(-0.5,len(sumary2)-0.5)
+
         ax1.set_xlabel('Relative abundance (%)', fontsize=8)
-        ax1.set_yticklabels('', fontsize=0)
-        ax1.legend(title= tax, title_fontsize = 6,  bbox_to_anchor=(1.66, 1.02), loc = 2, ncol = NUCOL,
+
+        if YYYYYYYYY == 'Both':
+            XLabelout = 1.8
+        if YYYYYYYYY == 'No_Kit':
+            XLabelout = 1.73
+        if YYYYYYYYY in ('DUCM', 'DPS'):
+            XLabelout = 1.93
+
+        ax1.legend(title= tax, title_fontsize = 6,  bbox_to_anchor=(XLabelout, 1.02), loc = 2, ncol = NUCOL,
                            handletextpad=0.5,
                            fancybox=True, framealpha=0.5, shadow=False,
                            handlelength = .7, labelspacing = 0.5, columnspacing = 1,
@@ -774,37 +1061,54 @@ def update_plot2(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_me
         ####################     circles       ######################
         #########################################################################
         if mostrar_circulos == True:
-            ax2 = fig.add_axes([denx2pos+0.005, CUADRO+0.01, CUADRO, 0.2])
+    
+            ax2 = fig.add_axes([denx2pos+0.005, CUADRO-0.005, CuadrO2, 0.07]) # 0.033
             ax2.set_facecolor('none')
+            ax2.set_aspect('equal', 'box')
 
             sample_ordenado0 = list(sumary2.index)
             sample_ordenado0 = list(reversed(sample_ordenado0))
-            cuadros = CUADRO/len(sample_ordenado0)
-            
-            inicio = denx2pos+0.005
-            inicioy = CUADRO+0.01
-            for u in sample_ordenado0:
-                #ax222 = plt.axes([inicio, inicioy, cuadros, cuadros])
+            cuadros = CUADRO/len(sumary2)
 
-                #ax222.text(0, 0, '   '+u, fontsize=7, color = 'black', ha='center', va = 'bottom', rotation=90)
-                
-                ax22 = plt.axes([inicio, inicioy, cuadros, cuadros])
-                
-                ax22.pie([numeros2[u][0], numeros2[u][1]], #autopct ='%1.1f%%',
-                            pctdistance = 0.5, labeldistance= 1,
-                            startangle = 0, radius = 1.1, rotatelabels = False,
-                            colors = ['black','silver'],
-                            wedgeprops={'alpha':1, 'linewidth': 0, 'edgecolor':'black'},
-                            explode = np.array([0.05, 0.05]), textprops=dict(size = 0))
-                centre_circle = plt.Circle((0,0),0.2,fc = 'white')
 
-                plt.gca().add_artist(centre_circle)
-                
-                ax22.text(0.2, 0, '   '+u, fontsize=7, color = 'black', ha='center', va = 'bottom', rotation=90)
-                
-                inicio += cuadros
-                inicioy = CUADRO+0.01
+            ax2.set_xlim(0,xlim)
+            ax2.set_ylim(0,radio*2)
 
+            sample_ordenado0 = list(sumary2.index)
+            sample_ordenado0 = list(reversed(sample_ordenado0))
+
+            teta1 = 0
+            ancho_circulo = 80
+            factor = xlim/len(sumary2)
+            xini = factor
+            for r0 in sample_ordenado0:
+                centro = (xini-(factor/2), radio)
+                Frac = fraccion(numeros2[r0])
+                explode = [0.15] * len(Frac)
+                num = 0
+                for frac, expl in zip(Frac, explode):
+                    if num == 0:
+                        nivelcolor = 'black'
+                    else:
+                        nivelcolor = 'silver'
+                    x, y = centro
+                    teta2 = (teta1 + frac)
+                    thetam = 2 * np.pi * 0.5 * (teta1 + teta2)
+                    x += expl * np.cos(thetam)
+                    y += expl * np.sin(thetam)
+                    w = mpatches.Wedge((x, y), radio*0.9, 360. * min(teta1, teta2),
+                                               360. * max(teta1, teta2),
+                                       width=radio*(ancho_circulo/100),
+                                               facecolor=nivelcolor)
+                    ax2.add_patch(w)
+                    teta1 = teta2
+                    num += 1
+                xini += factor
+
+            xini = factor
+            for r1 in sample_ordenado0:
+                ax2.text(xini-(factor/2), radio*2, ' '+r1, ha = 'center', va = 'bottom', fontsize = 7, rotation = 90)
+                xini += factor
 
             ax2.axis('off')
             
@@ -812,64 +1116,99 @@ def update_plot2(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_me
         #####################       metadata       ########################
         #########################################################################
         if mostrar_metadata == True:
-            ax3 = fig.add_axes([(CUADRO)+(denx2pos)+0.045, -0.015, 0.5, CUADRO+0.0415])
+            xlim2 = 100
+            ax3 = fig.add_axes([(CuadrO2)+(denx2pos)+0.062, 0, (xlim2*CuadrO2)/100, CUADRO])
             ax3.set_facecolor('none')
-            ax3.set_xlim(0, 65)
+            ax3.set_xlim(0,xlim2)
+            ax3.set_ylim(-0.5,len(sumary2)-0.5)
 
-            PUNTO = 50
-            inicio = 3
+            inicio = 4
             y_inicio = 0
-            agregado = 3.7
-            posiciones = []
+            yposiciones = []
             for index, row in names111[['Sample', 'Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'Kit', 'OTA']].drop_duplicates().iterrows():
                 ax3.scatter(inicio, y_inicio, s = PUNTO * ancho_barra, c = variedad[row.Coffee_Variety])
                 ax3.scatter(inicio + (agregado),y_inicio, s = PUNTO, c = procesado[row.Processing])
                 ax3.scatter(inicio + (agregado*2),y_inicio, s = PUNTO, c = cultivo[row.Cultivation])
                 ax3.scatter(inicio + (agregado*3),y_inicio, s = PUNTO, c = tiempo_secado[row.Time_Dry])
-                ax3.scatter(inicio + (agregado*4),y_inicio, s = PUNTO, c = kit[row.Kit])
-                ax3.scatter(inicio + (agregado*5),y_inicio, s = PUNTO, c = ota[row.OTA])
-                posiciones.append(y_inicio)
+                if YYYYYYYYY == 'Both':
+                    ax3.scatter(inicio + (agregado*4),y_inicio, s = PUNTO, c = ota[row.OTA])
+                    ax3.scatter(inicio + (agregado*5),y_inicio, s = PUNTO, c = kit[row.Kit])
+                    xposicionfinal = inicio + (agregado*5)
+                if YYYYYYYYY == 'No_Kit':
+                    ax3.scatter(inicio + (agregado*4),y_inicio, s = PUNTO, c = ota[row.OTA])
+                    xposicionfinal = inicio + (agregado*4)
+                if YYYYYYYYY in ('DUCM', 'DPS'):
+                    ax3.scatter(inicio + (agregado*4),y_inicio, s = PUNTO, c = ota[row.OTA])
+                    xposicionfinal = inicio + (agregado*4)
                 y_inicio += 1
+                yposiciones.append(y_inicio)
 
-            agre = [0, 1, 2, 3, 4, 5]
-            agregado = 3.7
-            for ag, VaR in zip(agre, ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'Kit', 'OTA']):
-                ax3.text(inicio + (agregado*ag), y_inicio-0.3, VaR, fontsize=6, color = 'black', ha='center',
-                                            va = 'bottom', rotation=90)
-            xpos = inicio + (agregado*6.2)
-            pos = max(list(reversed(posiciones)))
+
+            if YYYYYYYYY == 'Both':
+                inicio = 4
+                for VaR in ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'OTA', 'Kit']:
+                    ax3.text(inicio, y_inicio-0.25, VaR, fontsize=6, color = 'black', ha='center',
+                                                va = 'bottom', rotation=90)
+                    inicio += agregado
+            if YYYYYYYYY == 'No_Kit':
+                inicio = 4
+                for VaR in ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'OTA']:
+                    ax3.text(inicio, y_inicio-0.25, VaR, fontsize=6, color = 'black', ha='center',
+                                                va = 'bottom', rotation=90)
+                    inicio += agregado
+            if YYYYYYYYY in ('DUCM', 'DPS'):
+                inicio = 4
+                for VaR in ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'OTA']:
+                    ax3.text(inicio, y_inicio-0.5, VaR, fontsize=6, color = 'black', ha='center',
+                                                va = 'bottom', rotation=90)
+                    inicio += agregado
+
+
+            xpos = xposicionfinal + agregado
+            pos = max(list(reversed(yposiciones)))-0.5
             for i, u in zip([variedad, procesado, cultivo, tiempo_secado],
                             ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry']):
                 ax3.text(xpos, pos, u, fontsize=6, color = 'black', ha='left',
                                 va = 'center', weight='bold')
-                pos -= 1
+                pos -= sepp
                 for j in i:
-                    if j in ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']:
-                        ax3.scatter(xpos+1, pos, s = 13, c = i[j], marker = 's')
-                    else:
-                        ax3.scatter(xpos+1, pos, s = 20, c = i[j], marker = 'o')
+                    ax3.scatter(xpos+1, pos, s = 20, c = i[j], marker = 'o')
                     ax3.text(xpos+4, pos, j, fontsize=6, color = 'black', ha='left', va = 'center')
-                    pos -= 1
+                    pos -= sepp
 
-            xpos2 = inicio + (agregado*12.5)
-            pos2 = max(list(reversed(posiciones)))
-            for i, u in zip([kit, ota], ['Kit', 'OTA']):
-                ax3.text(xpos2, pos2, u, fontsize=6, color = 'black', ha='left',
-                        va = 'center', weight='bold')
-                pos2 -= 1
-                for j in i:
-                    ax3.scatter(xpos2+1, pos2, s = 20, c = i[j], marker = 'o')
-                    ax3.text(xpos2+4, pos2, j, fontsize=6, color = 'black', ha='left', va = 'center')
-                    pos2 -= 1
+            if YYYYYYYYY == 'Both':
+                xpos2 = xpos + agregado*5
+                pos2 = max(list(reversed(yposiciones)))-0.5
+                for i, u in zip([ota, kit], ['OTA', 'Kit']):
+                    ax3.text(xpos2, pos2, u, fontsize=6, color = 'black', ha='left',
+                            va = 'center', weight='bold')
+                    pos2 -= sepp
+                    for j in i:
+                        ax3.scatter(xpos2+1, pos2, s = 20, c = i[j], marker = 'o')
+                        ax3.text(xpos2+4, pos2, j, fontsize=6, color = 'black', ha='left', va = 'center')
+                        pos2 -= sepp
+            if YYYYYYYYY in ('No_Kit', 'DUCM', 'DPS'):
+                xpos2 = xpos + agregado*5
+                pos2 = max(list(reversed(yposiciones)))-0.5
+                for i, u in zip([ota], ['OTA']):
+                    ax3.text(xpos2, pos2, u, fontsize=6, color = 'black', ha='left',
+                            va = 'center', weight='bold')
+                    pos2 -= sepp
+                    for j in i:
+                        ax3.scatter(xpos2+1, pos2, s = 20, c = i[j], marker = 'o')
+                        ax3.text(xpos2+4, pos2, j, fontsize=6, color = 'black', ha='left', va = 'center')
+                        pos2 -= sepp
 
             ax3.axis('off')
+
+
         else:
-            ax1.legend(title= tax, title_fontsize = 6,  bbox_to_anchor=(1.05, 1.02), loc = 2, ncol = NUCOL,
+            ax1.legend(title=tax, title_fontsize = 8,  bbox_to_anchor=(1.131, 1.02), loc=2, ncol = NUCOL,
                            handletextpad=0.5,
                            fancybox=True, framealpha=0.5, shadow=False,
                            handlelength = .7, labelspacing = 0.5, columnspacing = 1,
                            borderpad = 0.5, edgecolor="gainsboro", #frameon=False,
-                           prop={'style':'italic', 'size':5})
+                           prop={'style':'italic', 'size':7})
             plt.gca().set_ylabel('', fontsize=0)
 
         if png == True:
@@ -923,6 +1262,9 @@ Method = widgets.Dropdown(options=metodos,value='complete',disabled=False,
                          layout=Layout(width='88px', height='25px'))
 Metric = widgets.Dropdown(options=metricas,value='euclidean',disabled=False,
                          layout=Layout(width='88px', height='25px'))
+
+selectkit = widgets.Dropdown(options=['DUCM', 'DPS', 'Both', 'No_Kit'],value='Both',disabled=False,
+                         layout=Layout(width='88px', height='25px'))
 ############
 
 
@@ -952,7 +1294,8 @@ def button_clicked(b):
         clear_output(True)
         update_plot(mostrar_dendrograma = show_dendrograma.value, mostrar_circulos = show_pies.value,
                    mostrar_metadata = show_anotaciones.value, rampa = Rampas.value,
-                   png = False, svg = False, etiqueta = '', umbral = '', orientacion = orientation.value)
+                   png = False, svg = False, etiqueta = '', umbral = '', orientacion = orientation.value,
+                   XXXXXXXXX = selectkit.value)
 
 button.on_click(button_clicked)
 #----------------------------------------------
@@ -975,7 +1318,7 @@ def button_clicked3(b):
         update_plot(mostrar_dendrograma = show_dendrograma.value, mostrar_circulos = show_pies.value,
                    mostrar_metadata = show_anotaciones.value, rampa = Rampas.value,
                    png = True, svg = False, etiqueta = data.value, umbral = str(Percentage.value),
-                    orientacion = orientation.value)
+                    orientacion = orientation.value, XXXXXXXXX = selectkit.value)
 
 
         
@@ -991,7 +1334,7 @@ def button_clicked5(b):
         update_plot(mostrar_dendrograma = show_dendrograma.value, mostrar_circulos = show_pies.value,
                    mostrar_metadata = show_anotaciones.value, rampa = Rampas.value,
                    png = False, svg = True, etiqueta = data.value, umbral = str(Percentage.value),
-                    orientacion = orientation.value)
+                    orientacion = orientation.value, XXXXXXXXX = selectkit.value)
         
 
         
@@ -1025,45 +1368,119 @@ OOTTAA = widgets.Dropdown(options=altos,value='tab20',
 
 
 def box1(data, Percentage, Method, Metric, Rampas,
-         CCOOFF,PPRROO,CCUULL,TTIIMM,KKIITT,OOTTAA):
+         CCOOFF,PPRROO,CCUULL,TTIIMM,KKIITT,OOTTAA,selectkit):
     barcolor(lista = QUALITATIVE_colors[Rampas])
     if data == 'ASV':
         muestras = muestras_ASVs
     elif data == 'OTU':
         muestras = muestras_OTUs
 
-    umbral_porcentaje = float(Percentage)   
-    ssss = {}
-    sumary = []
-    for co in muestras:
-        df = muestras[co]
-        df_up = df[df.Per > umbral_porcentaje]
-        df_down = df[df.Per <= umbral_porcentaje]
-        sm = []
-        numeros0 = {}
-        for tax in ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']:
-            df2 = df_up[df_up.Per > umbral_porcentaje][tax].drop_duplicates()
-            ll = [len(df_up[tax].drop_duplicates()), len(df_down[tax].drop_duplicates())]
-            numeros0[tax] = ll
-            sm.append(len(df2))
-        sm2 = list(np.array(sm) / np.sum(sm) * 100)
-        sm2.insert(0, co)
-        sumary.append(sm2)
-        ssss[co] = numeros0
+    if selectkit == 'DPS':
+        lista_samples_kit = Sampledata[Sampledata.Kit == selectkit].Sample.tolist()
+        umbral_porcentaje = float(Percentage)   
+        ssss = {}
+        sumary = []
+        for co in lista_samples_kit:
+            df = muestras[co]
+            df_up = df[df.Per > umbral_porcentaje]
+            df_down = df[df.Per <= umbral_porcentaje]
+            sm = []
+            numeros0 = {}
+            for tax in ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']:
+                df2 = df_up[df_up.Per > umbral_porcentaje][tax].drop_duplicates()
+                ll = [len(df_up[tax].drop_duplicates()), len(df_down[tax].drop_duplicates())]
+                numeros0[tax] = ll
+                sm.append(len(df2))
+            sm2 = list(np.array(sm) / np.sum(sm) * 100)
+            sm2.insert(0, co)
+            sumary.append(sm2)
+            ssss[co] = numeros0
 
-    SUMARY = DataFrame(sumary, columns = ['Sample','Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'])
+        SUMARY = DataFrame(sumary, columns = ['Sample','Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'])
 
-    # metodo y metrica
-    dend = dendrogram(linkage(SUMARY.iloc[:, 1:].values, Method, metric=Metric),
-                orientation='left',  no_plot = True,
-                labels=SUMARY.Sample.tolist(),
-                distance_sort='descending',
-                show_leaf_counts=True)
-    SUMARY1 = DataFrame(dend['ivl'], columns = ['Sample']).merge(SUMARY, on = 'Sample', how = 'left')
+        # metodo y metrica
+        dend = dendrogram(linkage(SUMARY.iloc[:, 1:].values, Method, metric=Metric),
+                    orientation='left',  no_plot = True,
+                    labels=SUMARY.Sample.tolist(),
+                    distance_sort='descending',
+                    show_leaf_counts=True)
+        SUMARY1 = DataFrame(dend['ivl'], columns = ['Sample']).merge(SUMARY, on = 'Sample', how = 'left')
 
-    SUMARY2 = SUMARY1.set_index('Sample')
+        SUMARY2 = SUMARY1.set_index('Sample')
 
-    names1 = DataFrame(dend['ivl'], columns = ['Sample'])
+        names1 = DataFrame(dend['ivl'], columns = ['Sample'])
+
+    elif selectkit == 'DUCM':
+        lista_samples_kit = Sampledata[Sampledata.Kit == selectkit].Sample.tolist()
+        umbral_porcentaje = float(Percentage)   
+        ssss = {}
+        sumary = []
+        for co in lista_samples_kit:
+            df = muestras[co]
+            df_up = df[df.Per > umbral_porcentaje]
+            df_down = df[df.Per <= umbral_porcentaje]
+            sm = []
+            numeros0 = {}
+            for tax in ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']:
+                df2 = df_up[df_up.Per > umbral_porcentaje][tax].drop_duplicates()
+                ll = [len(df_up[tax].drop_duplicates()), len(df_down[tax].drop_duplicates())]
+                numeros0[tax] = ll
+                sm.append(len(df2))
+            sm2 = list(np.array(sm) / np.sum(sm) * 100)
+            sm2.insert(0, co)
+            sumary.append(sm2)
+            ssss[co] = numeros0
+
+        SUMARY = DataFrame(sumary, columns = ['Sample','Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'])
+
+        # metodo y metrica
+        dend = dendrogram(linkage(SUMARY.iloc[:, 1:].values, Method, metric=Metric),
+                    orientation='left',  no_plot = True,
+                    labels=SUMARY.Sample.tolist(),
+                    distance_sort='descending',
+                    show_leaf_counts=True)
+        SUMARY1 = DataFrame(dend['ivl'], columns = ['Sample']).merge(SUMARY, on = 'Sample', how = 'left')
+
+        SUMARY2 = SUMARY1.set_index('Sample')
+
+        names1 = DataFrame(dend['ivl'], columns = ['Sample'])
+
+    elif selectkit in ('Both', 'No_Kit'):
+        umbral_porcentaje = float(Percentage)   
+        ssss = {}
+        sumary = []
+        for co in muestras:
+            df = muestras[co]
+            df_up = df[df.Per > umbral_porcentaje]
+            df_down = df[df.Per <= umbral_porcentaje]
+            sm = []
+            numeros0 = {}
+            for tax in ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']:
+                df2 = df_up[df_up.Per > umbral_porcentaje][tax].drop_duplicates()
+                ll = [len(df_up[tax].drop_duplicates()), len(df_down[tax].drop_duplicates())]
+                numeros0[tax] = ll
+                sm.append(len(df2))
+            sm2 = list(np.array(sm) / np.sum(sm) * 100)
+            sm2.insert(0, co)
+            sumary.append(sm2)
+            ssss[co] = numeros0
+
+        SUMARY = DataFrame(sumary, columns = ['Sample','Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'])
+
+        # metodo y metrica
+        dend = dendrogram(linkage(SUMARY.iloc[:, 1:].values, Method, metric=Metric),
+                    orientation='left',  no_plot = True,
+                    labels=SUMARY.Sample.tolist(),
+                    distance_sort='descending',
+                    show_leaf_counts=True)
+        SUMARY1 = DataFrame(dend['ivl'], columns = ['Sample']).merge(SUMARY, on = 'Sample', how = 'left')
+
+        SUMARY2 = SUMARY1.set_index('Sample')
+
+        names1 = DataFrame(dend['ivl'], columns = ['Sample'])
+
+
+
     variedad, procesado, cultivo, tiempo_secado, kit, ota, names1 = merge_tabla(DF = names1,
                                                                            varcol=QUALITATIVE_colors[CCOOFF],
                                                                             procol=QUALITATIVE_colors[PPRROO],
@@ -1083,7 +1500,7 @@ def box1(data, Percentage, Method, Metric, Rampas,
 OUT1 = widgets.interactive_output(box1, {'data':data, 'Percentage':Percentage, 'Method':Method,
                                          'Metric':Metric, 'Rampas':Rampas, 'CCOOFF':CCOOFF,
                                         'PPRROO':PPRROO,'CCUULL':CCUULL,'TTIIMM':TTIIMM,'KKIITT':KKIITT,
-                                        'OOTTAA':OOTTAA})
+                                        'OOTTAA':OOTTAA,'selectkit':selectkit})
 
 
 gris = widgets.Button(layout=Layout(width='0%', height='20px'), disabled=True)
@@ -1219,7 +1636,8 @@ GLOBAL_TAX = VBox([
                  VBox([widgets.Label('Circles:'), boton_pies]), 
                  VBox([widgets.Label('Metadata:'), boton_metadata]),
                  VBox([widgets.Label('Orientarion:'), hor_ver]),
-                 VBox([widgets.Label('Stacked Color:'), VBox([Rampas, OUT1])])                
+                 VBox([widgets.Label('Stacked Color:'), VBox([Rampas, OUT1])]),
+                 VBox([widgets.Label('Kit:'), selectkit])              
                 ])],
           
       layout = Layout(border='1px solid silver', width='950px')),
@@ -1243,6 +1661,9 @@ INDIVIDUAL_COLORS = ['BrBG','PiYG','PRGn','PuOr','RdBu','RdGy','RdYlBu','RdYlGn'
                      'Paired','Accent','Dark2','Set1','Set2','Set3','tab10','tab20','tab20b','tab20c']
 INDIVIDUAL_COLORS = list(set(INDIVIDUAL_COLORS + list(QUALITATIVE_colors.keys())))
 INDIVIDUAL_COLORS = dict(zip(INDIVIDUAL_COLORS, INDIVIDUAL_COLORS))
+
+coloresindividuales = list(INDIVIDUAL_COLORS.keys())
+coloresindividuales = sorted(coloresindividuales)
 
 
 Rampas2 = widgets.Dropdown(options=list(INDIVIDUAL_COLORS.keys()),value='tab20',
@@ -1290,6 +1711,9 @@ Method_i = widgets.Dropdown(options=metodos,value='complete',disabled=False,
                          layout=Layout(width='88px', height='25px'))
 Metric_i = widgets.Dropdown(options=metricas,value='euclidean',disabled=False,
                          layout=Layout(width='88px', height='25px'))
+
+selectkit_i = widgets.Dropdown(options=['DUCM', 'DPS', 'Both', 'No_Kit'],value='Both',disabled=False,
+                         layout=Layout(width='88px', height='25px'))
 ############
 
 tamano_plot_i = widgets.SelectionSlider(options=list(cor_size.keys()),value=4,disabled=False,
@@ -1327,48 +1751,125 @@ Linaje = widgets.Dropdown(options=['Phylum', 'Class', 'Order', 'Family', 'Genus'
 
 
 def box11(data_i, Linaje, Percentage2, Method_i, Metric_i,
-         CCOOFF_i,PPRROO_i,CCUULL_i,TTIIMM_i,KKIITT_i,OOTTAA_i):
+         CCOOFF_i,PPRROO_i,CCUULL_i,TTIIMM_i,KKIITT_i,OOTTAA_i, selectkit_i):
     tax = Linaje
     
     if data_i == 'ASV':
         TAX_DFS = TAX_DFS_ASVs
     elif data_i == 'OTU':
         TAX_DFS = TAX_DFS_OTUs
+    
+    
+    if selectkit_i == 'DPS':
+        lista_samples_kit = Sampledata[Sampledata.Kit == selectkit_i].Sample.tolist()
 
-    umbral_porcentaje = float(Percentage2)
+        umbral_porcentaje = float(Percentage2)
+        numeros2 = {}
+        abundancias = []
+        for i in lista_samples_kit:
+            co = i
+            df = TAX_DFS[Linaje][[tax, co]]
+            df = df.sort_values(by =co,ascending=False).reset_index(drop=True)
+            df = df[df[co] > 0]
+            suma = df[co].sum()
+            df[co] = (df[co] / suma) * 100
+            ff = df[df[co] > umbral_porcentaje] # umbral %
+            kf = df[df[co] <= umbral_porcentaje]
+            numeros2[i] = [len(ff), len(kf)]
+            kf = DataFrame({tax:['Others'], co:[kf[co].sum()]})
+            hf = pd.concat([ff, kf])
+            abundancias.append(hf)
+
+        Abundance = reduce(lambda  left,right: pd.merge(left,right,on=[tax], how='outer'), abundancias).fillna(0)
+        Abundance = Abundance.rename(columns={tax: 'Sample'})
+        Abundance = Abundance.set_index('Sample')
+        Abundance = Abundance.T
+        Abundance.insert(loc = 0, column='Sample', value=Abundance.index)
+
+        # metodo y metrica
+        dendo = dendrogram(linkage(Abundance.iloc[:, 1:].values, Method_i, metric=Metric_i),
+                    orientation='left',  no_plot = True,
+                    labels=Abundance.Sample.tolist(),
+                    distance_sort='descending',
+                    show_leaf_counts=True)
+        AAbundancEE = DataFrame(dendo['ivl'], columns = ['Sample']).merge(Abundance, on = 'Sample', how = 'left')
+        AAbundancEE = AAbundancEE.set_index('Sample')
+
+        names11 = DataFrame(dendo['ivl'], columns = ['Sample'])
+        
+    elif selectkit_i == 'DUCM':
+        lista_samples_kit = Sampledata[Sampledata.Kit == selectkit_i].Sample.tolist()
+        
+        umbral_porcentaje = float(Percentage2)
+        numeros2 = {}
+        abundancias = []
+        for i in lista_samples_kit:
+            co = i
+            df = TAX_DFS[Linaje][[tax, co]]
+            df = df.sort_values(by =co,ascending=False).reset_index(drop=True)
+            df = df[df[co] > 0]
+            suma = df[co].sum()
+            df[co] = (df[co] / suma) * 100
+            ff = df[df[co] > umbral_porcentaje] # umbral %
+            kf = df[df[co] <= umbral_porcentaje]
+            numeros2[i] = [len(ff), len(kf)]
+            kf = DataFrame({tax:['Others'], co:[kf[co].sum()]})
+            hf = pd.concat([ff, kf])
+            abundancias.append(hf)
+
+        Abundance = reduce(lambda  left,right: pd.merge(left,right,on=[tax], how='outer'), abundancias).fillna(0)
+        Abundance = Abundance.rename(columns={tax: 'Sample'})
+        Abundance = Abundance.set_index('Sample')
+        Abundance = Abundance.T
+        Abundance.insert(loc = 0, column='Sample', value=Abundance.index)
+
+        # metodo y metrica
+        dendo = dendrogram(linkage(Abundance.iloc[:, 1:].values, Method_i, metric=Metric_i),
+                    orientation='left',  no_plot = True,
+                    labels=Abundance.Sample.tolist(),
+                    distance_sort='descending',
+                    show_leaf_counts=True)
+        AAbundancEE = DataFrame(dendo['ivl'], columns = ['Sample']).merge(Abundance, on = 'Sample', how = 'left')
+        AAbundancEE = AAbundancEE.set_index('Sample')
+
+        names11 = DataFrame(dendo['ivl'], columns = ['Sample'])
     
-    numeros2 = {}
-    abundancias = []
-    for i in list(TAX_DFS[Linaje].iloc[:, 1:].columns):
-        co = i
-        df = TAX_DFS[Linaje][[tax, co]]
-        df = df.sort_values(by =co,ascending=False).reset_index(drop=True)
-        df = df[df[co] > 0]
-        suma = df[co].sum()
-        df[co] = (df[co] / suma) * 100
-        ff = df[df[co] > umbral_porcentaje] # umbral %
-        kf = df[df[co] <= umbral_porcentaje]
-        numeros2[i] = [len(ff), len(kf)]
-        kf = DataFrame({tax:['Others'], co:[kf[co].sum()]})
-        hf = pd.concat([ff, kf])
-        abundancias.append(hf)
+    elif selectkit_i in ('Both', 'No_Kit'):
     
-    Abundance = reduce(lambda  left,right: pd.merge(left,right,on=[tax], how='outer'), abundancias).fillna(0)
-    Abundance = Abundance.rename(columns={tax: 'Sample'})
-    Abundance = Abundance.set_index('Sample')
-    Abundance = Abundance.T
-    Abundance.insert(loc = 0, column='Sample', value=Abundance.index)
-    
-    # metodo y metrica
-    dendo = dendrogram(linkage(Abundance.iloc[:, 1:].values, Method_i, metric=Metric_i),
-                orientation='left',  no_plot = True,
-                labels=Abundance.Sample.tolist(),
-                distance_sort='descending',
-                show_leaf_counts=True)
-    AAbundancEE = DataFrame(dendo['ivl'], columns = ['Sample']).merge(Abundance, on = 'Sample', how = 'left')
-    AAbundancEE = AAbundancEE.set_index('Sample')
-    
-    names11 = DataFrame(dendo['ivl'], columns = ['Sample'])
+        umbral_porcentaje = float(Percentage2)
+        numeros2 = {}
+        abundancias = []
+        for i in list(TAX_DFS[Linaje].iloc[:, 1:].columns):
+            co = i
+            df = TAX_DFS[Linaje][[tax, co]]
+            df = df.sort_values(by =co,ascending=False).reset_index(drop=True)
+            df = df[df[co] > 0]
+            suma = df[co].sum()
+            df[co] = (df[co] / suma) * 100
+            ff = df[df[co] > umbral_porcentaje] # umbral %
+            kf = df[df[co] <= umbral_porcentaje]
+            numeros2[i] = [len(ff), len(kf)]
+            kf = DataFrame({tax:['Others'], co:[kf[co].sum()]})
+            hf = pd.concat([ff, kf])
+            abundancias.append(hf)
+
+        Abundance = reduce(lambda  left,right: pd.merge(left,right,on=[tax], how='outer'), abundancias).fillna(0)
+        Abundance = Abundance.rename(columns={tax: 'Sample'})
+        Abundance = Abundance.set_index('Sample')
+        Abundance = Abundance.T
+        Abundance.insert(loc = 0, column='Sample', value=Abundance.index)
+
+        # metodo y metrica
+        dendo = dendrogram(linkage(Abundance.iloc[:, 1:].values, Method_i, metric=Metric_i),
+                    orientation='left',  no_plot = True,
+                    labels=Abundance.Sample.tolist(),
+                    distance_sort='descending',
+                    show_leaf_counts=True)
+        AAbundancEE = DataFrame(dendo['ivl'], columns = ['Sample']).merge(Abundance, on = 'Sample', how = 'left')
+        AAbundancEE = AAbundancEE.set_index('Sample')
+
+        names11 = DataFrame(dendo['ivl'], columns = ['Sample'])
+
     variedad_i, procesado_i, cultivo_i, tiempo_secado_i, kit_i, ota_i, names111 = merge_tabla(DF = names11,
                                                                            varcol=QUALITATIVE_colors[CCOOFF_i],
                                                                             procol=QUALITATIVE_colors[PPRROO_i],
@@ -1390,10 +1891,11 @@ def box11(data_i, Linaje, Percentage2, Method_i, Metric_i,
     
 
     
-OUT11 = widgets.interactive_output(box11, {'data_i':data_i, 'Linaje':Linaje, 'Percentage2':Percentage2, 'Method_i':Method_i,
+OUT11 = widgets.interactive_output(box11, {'data_i':data_i, 'Linaje':Linaje, 'Percentage2':Percentage2,
+                                           'Method_i':Method_i,
                                          'Metric_i':Metric_i, 'CCOOFF_i':CCOOFF_i,
                                         'PPRROO_i':PPRROO_i,'CCUULL_i':CCUULL_i,'TTIIMM_i':TTIIMM_i,
-                                        'KKIITT_i':KKIITT_i,'OOTTAA_i':OOTTAA_i})
+                                           'KKIITT_i':KKIITT_i,'OOTTAA_i':OOTTAA_i,'selectkit_i':selectkit_i})
 
 
 
@@ -1410,7 +1912,7 @@ def button_clickeddd(b):
         update_plot2(mostrar_dendrograma = show_dendrograma_i.value, mostrar_circulos = show_pies_i.value,
                      mostrar_metadata = show_anotaciones_i.value, orientacion = orientation_i.value,
                rampa = Rampas2.value, etiqueta = '', umbral = '', NUCOL = NumcoL.value, tax = Linaje.value,
-            png = False, svg = False)
+            png = False, svg = False, YYYYYYYYY = selectkit_i.value)
 
 buttonnn.on_click(button_clickeddd)
 #----------------------------------------------
@@ -1424,7 +1926,7 @@ def button_clicked333(b):
         update_plot2(mostrar_dendrograma = show_dendrograma_i.value, mostrar_circulos = show_pies_i.value,
                      mostrar_metadata = show_anotaciones_i.value, orientacion = orientation_i.value,
                rampa = Rampas2.value, etiqueta = data_i.value, umbral = str(Percentage2.value), NUCOL = NumcoL.value, tax = Linaje.value,
-            png = True, svg = False)
+            png = True, svg = False, YYYYYYYYY = selectkit_i.value)
 
         
 boton333.on_click(button_clicked333)
@@ -1439,7 +1941,7 @@ def button_clicked444(b):
         update_plot2(mostrar_dendrograma = show_dendrograma_i.value, mostrar_circulos = show_pies_i.value,
                      mostrar_metadata = show_anotaciones_i.value, orientacion = orientation_i.value,
                rampa = Rampas2.value, etiqueta = data_i.value, umbral = str(Percentage2.value), NUCOL = NumcoL.value, tax = Linaje.value,
-            png = False, svg = True)
+            png = False, svg = True, YYYYYYYYY = selectkit_i.value)
 
         
 boton444.on_click(button_clicked444)
@@ -1578,9 +2080,13 @@ box_layout111 = Layout(display='flex',
 
 
 def SELECTSAM(SAM_SELECT = ''):
+    import ctypes
+    
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    
     import datetime
     sumary111 = []
-    uno = open('Anexos16S/AAbundancEE.txt', 'r')
+    uno = open('AnexosITS/AAbundancEE.txt', 'r')
     for enu, line in enumerate(uno):
         line = line.rstrip()
         if enu == 0:
@@ -1593,18 +2099,21 @@ def SELECTSAM(SAM_SELECT = ''):
     sumary2 = sumary2.astype('float64')
 
 
-    fig = plt.figure()
-    ax1 = fig.add_axes([0, 0, 1, 1])
-    sumary2.plot(kind='barh', stacked=True, colormap = plt.get_cmap(Rampas2.value), alpha = 1, ax = ax1)
-    atributos = plt.legend(title='', title_fontsize = 8,  bbox_to_anchor=(1, 0.96), loc=2, ncol = 1,
-                           prop={'size':7})
-    plt.close()
+    rangonumeros = np.arange(len(sumary2.columns))
+    serie = dict(zip(sumary2.columns, rangonumeros))
 
-    atributos2 = atributos.legendHandles
-    posibles = [matplotlib.colors.to_hex(i) for i in np.array([i.get_facecolor() for i in atributos2])]
-    handles, labels = ax1.get_legend_handles_labels()
-    # correspondencia de colores de acuerdo al stacked plot
-    CorrepondenciA = dict(zip(labels, posibles))
+    cnorm = mpl.colors.Normalize(vmin=min(list(serie.values())), vmax=max(list(serie.values())))
+    cpick = cm.ScalarMappable(norm=cnorm, cmap=Rampas2.value)
+
+    cpick.set_array([])
+    val_map = {}
+    for k, v in zip(list(serie.keys()), list(serie.values())):
+        val_map[k] = cpick.to_rgba(v)
+    colors = [] # rgb
+    CorrepondenciA = {} # hex
+    for node in list(serie.keys()):
+        colors.append(val_map[node])
+        CorrepondenciA[node] = to_hex(val_map[node]) # correspondencia de colores de acuerdo al stacked plot
 
 
     df_one = sumary2.T[[SAM_SELECT]][sumary2.T[[SAM_SELECT]][SAM_SELECT] > 0].sort_values(by =SAM_SELECT,ascending=False)
@@ -1630,7 +2139,7 @@ def SELECTSAM(SAM_SELECT = ''):
     cero.grid(column=0, row=0, sticky = W+E+S)
     
     
-    cero1 = Label(root, text='16S Analysis', font=("Arial", 12,  "bold"), fg = 'silver', bg = 'white')
+    cero1 = Label(root, text='ITS Analysis', font=("Arial", 12,  "bold"), fg = 'silver', bg = 'white')
     cero1.grid(column=4, row=0, sticky = W+S)
 
     labebl = Label(root, text= '', font=("Arial", 8), fg="red", bg = 'white')
@@ -1834,25 +2343,52 @@ def SELECTSAM(SAM_SELECT = ''):
     root.mainloop()
 
 Sample_Select = widgets.Dropdown(options=list(ordenado3.values()),value=list(ordenado3.values())[0],disabled=False,
-                         layout=Layout(width='88px', height='40px'))
+                         layout=Layout(width='88px', height='35px'))
 
 
-def samsel(Sample_Select):
-
-    bot0 = widgets.Button(description=Sample_Select, layout=Layout(width='80px'))
-    bot0.style.button_color = 'cyan'
-    bot0.style.font_weight = 'bold'
-    outbot0 = widgets.Output()
+def samsel(Sample_Select, selectkit_i):
     
-    display(bot0, outbot0)
-    def button_bot0(b):
-        with outbot0:
-            clear_output(True)
-            SELECTSAM(SAM_SELECT = Sample_Select)
+    if selectkit_i in ('DUCM', 'DPS'):
+        
+        lista_samples_kit = Sampledata[Sampledata.Kit == selectkit_i].Sample.tolist()
+        if Sample_Select in lista_samples_kit:
+        
+            bot0 = widgets.Button(description=Sample_Select, layout=Layout(width='80px', height='25px'))
+            bot0.style.button_color = 'cyan'
+            #bot0.style.font_weight = 'bold'
+            outbot0 = widgets.Output()
 
-    bot0.on_click(button_bot0)
+            display(bot0, outbot0)
+            def button_bot0(b):
+                with outbot0:
+                    clear_output(True)
+                    SELECTSAM(SAM_SELECT = Sample_Select)
+
+            bot0.on_click(button_bot0)
+        else:
+            print('No in '+selectkit_i)
+        
+    if selectkit_i in ('Both', 'No_Kit'):
+        
+        lista_samples_kit = list(ordenado3.values())
+        if Sample_Select in lista_samples_kit:
+
+            bot0 = widgets.Button(description=Sample_Select, layout=Layout(width='80px', height='25px'))
+            bot0.style.button_color = 'cyan'
+            #bot0.style.font_weight = 'bold'
+            outbot0 = widgets.Output()
+
+            display(bot0, outbot0)
+            def button_bot0(b):
+                with outbot0:
+                    clear_output(True)
+                    SELECTSAM(SAM_SELECT = Sample_Select)
+
+            bot0.on_click(button_bot0)
+        else:
+            print('No')
     
-samselOUT = widgets.interactive_output(samsel, {'Sample_Select':Sample_Select})
+samselOUT = widgets.interactive_output(samsel, {'Sample_Select':Sample_Select, 'selectkit_i':selectkit_i})
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1869,13 +2405,13 @@ TAXONOMI_IND = VBox([
                  VBox([widgets.Label('Orientarion:'), hor_ver_i]),
                  VBox([widgets.Label('Stacked Color:'), VBox([Rampas2, OUTboxrampas2])]),
                  VBox([widgets.Label('Explore Samples:'),
-     Box(children=[HBox([Sample_Select, samselOUT])], layout= Layout(border='1px solid pink', width='179px', height='46px'))])             
+     Box(children=[HBox([VBox([HBox([Sample_Select, samselOUT]), HBox([widgets.Label('Kit:'), selectkit_i])])])], layout= Layout(border='1px solid pink', width='200px', height='73px'))])             
                 ])],
           
       layout = Layout(border='1px solid silver', width='950px')),
     Box(children = [Percentage2], layout = Layout(border='1px solid silver', width='950px')),
     Box(children = [HBox([buttonnn, NumcoL, boton333, boton444])],  layout = Layout(border='1px solid silver', width='950px')),
-    HBox([Box(children=[outputtt], layout=box_layout111), VBox([carousel_i, boton4])])
+    HBox([Box(children=[outputtt], layout=box_layout111), VBox([carousel_i])]) # VBox([carousel_i, boton4])
 ])
 
 
@@ -1902,44 +2438,64 @@ idividuosOTUs = indices_OTUs[indices_OTUs['Unnamed: 0'] == 'Individuals'].iloc[:
 
 OTUs_counts = dict(zip(list(idividuosOTUs.columns), list(idividuosOTUs.values[0])))
 
+selectkit3 = widgets.Dropdown(options=['DUCM', 'DPS', 'Both', 'No_Kit'],value='Both',disabled=False,
+                         layout=Layout(width='88px', height='25px'))
+
 
 def indice_plot(data_ind = 'ASV', tipo_indice = 'Taxa_S', show_barras = True,
                 show_puntos = True, show_texto = True, ColormaP = 'RdYlGn', tamano = 7,
-                png = False, svg = False, linea = True, ancholinea = 1):
+                png = False, svg = False, linea = True, ancholinea = 1, ZZZZZZZ = 'Both'):
     if data_ind == 'ASV':
         Indices = indices_ASVs
         dict_counts = ASVs_counts
     elif data_ind == 'OTU':
         Indices = indices_OTUs
         dict_counts = OTUs_counts
+        
+    if ZZZZZZZ in ('DUCM', 'DPS'):
+        index_columnas = Sampledata[Sampledata.Kit == ZZZZZZZ].Sample.tolist()
+        cambiosize = 3
+    if ZZZZZZZ in ('Both', 'No_Kit'):
+        index_columnas = list(Indices.iloc[:, 1:].columns)
+        cambiosize = 0
+        
+    Indices = Indices[['Unnamed: 0'] + index_columnas]
+    
+    ordenado44 = list(set([int(re.search('[0-9]{1,2}', i).group()) for i in index_columnas]))
+    ordenado33 = {}
+    for q in ordenado44:
+        for w in index_columnas:
+            if re.search('^\d+', w[0:2]): 
+                if q == int(re.search('^\d+', w[0:2]).group()):
+                    ordenado33[q] = w
     
     INDICE = tipo_indice
     SIZe = tamano
     LETRAS = SIZe
 
     EJE_X = np.array(range(len(Indices.iloc[:, 1:].columns)))
-    EJE_Y = np.array(list(Indices[Indices['Unnamed: 0'] == INDICE][list(ordenado3.values())].iloc[:, :].values[0]))
-    PESOS = np.array([dict_counts[ordenado3[i]] for i in ordenado3])/500
+    EJE_Y = np.array(list(Indices[Indices['Unnamed: 0'] == INDICE][index_columnas].iloc[:, :].values[0]))
+    PESOS = np.array([dict_counts[ordenado33[i]] for i in ordenado33])/500
 
     mpl.rcParams.update(mpl.rcParamsDefault)
 
-    fig, ax = plt.subplots(figsize=(SIZe, ((SIZe * 2.5) /  7)))
+    fig, ax = plt.subplots(figsize=(SIZe - cambiosize, ((SIZe * 2.5) /  7)))
     
     if show_puntos == True:
         ax.scatter(EJE_X, EJE_Y,
                    marker='o', c=[matplotlib.colors.to_hex(i) for i in plt.get_cmap(ColormaP)(np.arange(len(Indices.iloc[:, 1:].columns))/len(Indices.iloc[:, 1:].columns))],
                    s=PESOS, alpha=1,linewidth=0)
-        ax.scatter(np.array([(len(ordenado3)+1), (len(ordenado3)+1), (len(ordenado3)+1)]), np.array([ax.get_ylim()[1]*0.8,
+        ax.scatter(np.array([(len(ordenado33)+1), (len(ordenado33)+1), (len(ordenado33)+1)]), np.array([ax.get_ylim()[1]*0.8,
                                                      ax.get_ylim()[1]*0.69,
                                                      ax.get_ylim()[1]*0.55]),
                    zorder=10, s = np.array([50000/500, 100000/500, 150000/500]),
                        marker = 'o', c = 'black', linewidth=0,
                        edgecolors = 'white',alpha=1)
 
-        plt.text((len(ordenado3)+2), ax.get_ylim()[1]*0.8, ' 50000', color = 'black', fontsize = LETRAS, ha = 'left', va = 'center')
-        plt.text((len(ordenado3)+2), ax.get_ylim()[1]*0.69, '100000', color = 'black', fontsize = LETRAS, ha = 'left', va = 'center')
-        plt.text((len(ordenado3)+2), ax.get_ylim()[1]*0.55, '150000', color = 'black', fontsize = LETRAS, ha = 'left', va = 'center')
-        plt.text((len(ordenado3)+1), ax.get_ylim()[1]*0.92,
+        plt.text((len(ordenado33)+2), ax.get_ylim()[1]*0.8, ' 50000', color = 'black', fontsize = LETRAS, ha = 'left', va = 'center')
+        plt.text((len(ordenado33)+2), ax.get_ylim()[1]*0.69, '100000', color = 'black', fontsize = LETRAS, ha = 'left', va = 'center')
+        plt.text((len(ordenado33)+2), ax.get_ylim()[1]*0.55, '150000', color = 'black', fontsize = LETRAS, ha = 'left', va = 'center')
+        plt.text((len(ordenado33)+1), ax.get_ylim()[1]*0.92,
                      'Individuals', color = 'black', fontsize = LETRAS+1, ha = 'left', va = 'center', weight = 'bold')
         
     else:
@@ -1965,25 +2521,20 @@ def indice_plot(data_ind = 'ASV', tipo_indice = 'Taxa_S', show_barras = True,
 
     plt.yticks(size=7)
     plt.gca().tick_params(which='major', width = 0.3, length=2, color='black')
-    plt.gca().spines['left'].set_position(('data',-1))
+    #plt.gca().spines['left'].set_position(('data',-1))
     plt.gca().spines['bottom'].set_linewidth(0.5)
     plt.gca().spines['left'].set_color('black')
     plt.gca().spines['bottom'].set_color('black')
     plt.gca().spines['right'].set_color(None)
     plt.gca().spines['top'].set_color(None)
 
-    plt.xticks(list(range(len(ordenado4))), [ordenado3[i] for i in ordenado4], size=LETRAS+1, rotation=90, weight = 'bold')
+    plt.xticks(list(range(len(ordenado44))), [ordenado33[i] for i in ordenado44], size=LETRAS+1, rotation=90, weight = 'bold')
     plt.yticks(size=LETRAS)
 
     plt.gca().set_ylabel(INDICE, fontsize=LETRAS+1, weight = 'bold')
 
     plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1] + (ax.get_ylim()[1]*0.15))
     plt.gca().set_xlabel('', fontsize=0)
-
-    if png == True:
-        plt.savefig('Plots16S/'+data_ind+'_Diversity_Index_'+tipo_indice+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
-    if svg == True:
-        plt.savefig('Plots16S/'+data_ind+'_Diversity_Index_'+tipo_indice+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
 
     plt.show()
 
@@ -2055,7 +2606,7 @@ def button_ind_plot(b):
         indice_plot(data_ind = data_ind.value, tipo_indice = tipo_indice.value, show_barras = show_barras.value,
                 show_puntos = show_puntos.value, show_texto = show_texto.value, ColormaP = Rampas3.value,
                    tamano = cor_size2[tamano_plot_ind.value], png = False, svg = False, linea = show_linea.value,
-                   ancholinea = lineancho.value)
+                   ancholinea = lineancho.value, ZZZZZZZ = selectkit3.value)
 
 but_ind_plot.on_click(button_ind_plot)
 #----------------------------------------------
@@ -2069,7 +2620,7 @@ def button_ind_plot_save(b):
         indice_plot(data_ind = data_ind.value, tipo_indice = tipo_indice.value, show_barras = show_barras.value,
                 show_puntos = show_puntos.value, show_texto = show_texto.value, ColormaP = Rampas3.value,
                    tamano = cor_size2[tamano_plot_ind.value], png = True, svg = False, linea = show_linea.value,
-                   ancholinea = lineancho.value)
+                   ancholinea = lineancho.value, ZZZZZZZ = selectkit3.value)
 
 but_ind_plot_save.on_click(button_ind_plot_save)
 #----------------------------------------------
@@ -2083,7 +2634,7 @@ def button_ind_plot_save2(b):
         indice_plot(data_ind = data_ind.value, tipo_indice = tipo_indice.value, show_barras = show_barras.value,
                 show_puntos = show_puntos.value, show_texto = show_texto.value, ColormaP = Rampas3.value,
                    tamano = cor_size2[tamano_plot_ind.value], png = False, svg = True, linea = show_linea.value,
-                   ancholinea = lineancho.value)
+                   ancholinea = lineancho.value, ZZZZZZZ = selectkit3.value)
 
 but_ind_plot_save2.on_click(button_ind_plot_save2)
 
@@ -2104,7 +2655,7 @@ OUTlin = widgets.interactive_output(lin, {'lineancho':lineancho})
 
 
 
-Rampas3 = widgets.Dropdown(options=list(INDIVIDUAL_COLORS.keys()),value='RdYlGn',
+Rampas3 = widgets.Dropdown(options=coloresindividuales,value='RdYlGn',
                           disabled=False,
                          layout=Layout(width='98px', height='25px'))
 
@@ -2132,7 +2683,8 @@ INDICES_16S = VBox([Box([HBox([VBox([widgets.Label('Clustering:'), boton_data_in
                                VBox([widgets.Label('Points:'), boton_show_puntos]),
                                VBox([widgets.Label('Text:'), boton_show_texto]),
                                VBox([widgets.Label('Line:'), boton_show_linea]),
-                               VBox([widgets.Label('Points Color:'), Rampas3, OUTboxrampas3])
+                               VBox([widgets.Label('Points Color:'), Rampas3, OUTboxrampas3]),
+                               VBox([widgets.Label(' Kit: '), selectkit3])
                                ])], layout = Layout(border='1px solid silver', width='950px')),
                     Box([HBox([but_ind_plot, tamano_plot_ind, but_ind_plot_save, but_ind_plot_save2])], 
                         layout = Layout(border='1px solid silver', width='950px')),
