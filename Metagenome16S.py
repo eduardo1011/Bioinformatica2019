@@ -2086,7 +2086,7 @@ def SELECTSAM(SAM_SELECT = ''):
     
     import datetime
     sumary111 = []
-    uno = open('AnexosITS/AAbundancEE.txt', 'r')
+    uno = open('Anexos16S/AAbundancEE.txt', 'r')
     for enu, line in enumerate(uno):
         line = line.rstrip()
         if enu == 0:
