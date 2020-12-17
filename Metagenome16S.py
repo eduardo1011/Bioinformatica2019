@@ -2139,7 +2139,7 @@ def SELECTSAM(SAM_SELECT = ''):
     cero.grid(column=0, row=0, sticky = W+E+S)
     
     
-    cero1 = Label(root, text='ITS Analysis', font=("Arial", 12,  "bold"), fg = 'silver', bg = 'white')
+    cero1 = Label(root, text='16S Analysis', font=("Arial", 12,  "bold"), fg = 'silver', bg = 'white')
     cero1.grid(column=4, row=0, sticky = W+S)
 
     labebl = Label(root, text= '', font=("Arial", 8), fg="red", bg = 'white')
