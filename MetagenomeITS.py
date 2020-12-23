@@ -360,9 +360,15 @@ def update_plot(mostrar_dendrograma = True, mostrar_circulos = True, mostrar_met
     ota = oooo[5]
     unicos2 = [str(x) for x in sorted([float(i) for i in ota])]
     ota = dict(zip(unicos2, [ota[j] for j in unicos2]))
-    
+
+    TUPLAS = {}
+    for i in sumary2.index:
+        tupla = tuple(sumary2[sumary2.index == i]).values[0])
+        TUPLAS[i] = tupla
+
+
     ancho_barra = 0.8
-    
+
     ##########################
     
     if orientacion == 'VBar':
