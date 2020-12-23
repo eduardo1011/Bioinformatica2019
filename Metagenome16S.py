@@ -2121,9 +2121,9 @@ def SELECTSAM(SAM_SELECT = ''):
     df_two = Sampledata[Sampledata.Sample == SAM_SELECT]
     df_two = df_two.set_index('Sample').T
 
-    namesmax = max([len(i) for i in df_one.index])+2
+    namesmax = max([len(i) for i in df_one.index])+3
     nummax = max([len(str(round(i, 4))) for i in df_one[SAM_SELECT]])
-    namesmax2 = max([len(i) for i in df_two.index])+1
+    namesmax2 = max([len(i) for i in df_two.index])+2
     nummax2 = max([len(i) for i in df_two[SAM_SELECT]])
 
     #**************************************************************************
@@ -2157,7 +2157,7 @@ def SELECTSAM(SAM_SELECT = ''):
     table.grid(column=0, row=3, sticky =  W+E+N)
 
     for h, i in enumerate(df_one.index):
-        table.insert(tk.INSERT, '  '+i+'\n')
+        table.insert(tk.INSERT, '  '+i+' \n')
     table.config(state=DISABLED)
 
     table2 = tk.Text(root, font=("Arial", 8), height=len(df_one), width=nummax, fg = 'black', bg ='lightcyan' )
@@ -2230,6 +2230,8 @@ def SELECTSAM(SAM_SELECT = ''):
         centre_circle = plt.Circle((0.5,0.5),0.2,fc = 'white')
         plt.gca().add_artist(centre_circle)
 
+        ax.text(0.5,0.5, SAM_SELECT, fontsize = 10, weight='bold', color = 'black', ha = 'center', va = 'center', zorder = 2)
+
         ax.set_xlim(0,2)
 
         ax.axis('off')
@@ -2276,6 +2278,8 @@ def SELECTSAM(SAM_SELECT = ''):
     
         centre_circle = plt.Circle((0.5,0.5),0.2,fc = 'white')
         plt.gca().add_artist(centre_circle)
+
+        ax.text(0.5,0.5, SAM_SELECT, fontsize = 10, weight='bold', color = 'black', ha = 'center', va = 'center', zorder = 2)
 
         ax.set_xlim(0,2)
 
@@ -2334,6 +2338,8 @@ def SELECTSAM(SAM_SELECT = ''):
 
     centre_circle = plt.Circle((0.5,0.5),0.2,fc = 'white')
     plt.gca().add_artist(centre_circle)
+
+    ax.text(0.5,0.5, SAM_SELECT, fontsize = 10, weight='bold', color = 'black', ha = 'center', va = 'center', zorder = 2)
 
     ax.set_xlim(0,2)
 
