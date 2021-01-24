@@ -3843,7 +3843,7 @@ def chord_plot(title_kit = ''):
             ax.set_ylim(-float(lim_xy.get()), float(lim_xy.get()))
             ax.axis('off')
 
-            plt.savefig('Plots16S/Chord_'+title_kit+'_'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
+            plt.savefig('Plots16S/Chord_'+title_kit+'_'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.svg', dpi = 900, bbox_inches= 'tight')
             plt.close()
         ###############
         ###############
