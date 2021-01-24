@@ -2488,7 +2488,6 @@ def chord_plot(title_kit = ''):
         #print(Counts_SOURCE)
         Counts_TARGET = dict(Counter([TARGET for SOURCE, TARGET in net]))
         #print(Counts_TARGET)
-        origenes_colors = dict(zip(origenes, tab20+tab20))
         pal_max_origenes = max([len(i) for i in origenes])
         pal_max_destinos = max([len(i) for i in destinos])
 
