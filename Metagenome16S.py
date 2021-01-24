@@ -2399,6 +2399,76 @@ samselOUT = widgets.interactive_output(samsel, {'Sample_Select':Sample_Select, '
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+from collections import Counter
+import matplotlib
+from matplotlib import cm
+import matplotlib.path as mpath
+import matplotlib.patches as mpatches
+
+def source1(radio = 1, theta1 = 0, theta2 = 45, width = 0.05, sep = 0.05, color = 'red'):
+    sour = mpatches.Wedge((0, 0), # centro
+                          radio, # radio
+                          theta1, # angulo inicial
+                          theta2, # angulo final
+                          width=width, # ancho el 10% del radio
+                          #url = 'https://www.uniprot.org/',
+                          facecolor=color, zorder = 1)
+    mitad = int(len(sour.get_path().vertices[:-2])/2)
+    mitad1 = sour.get_path().vertices[:-2][:mitad,:]
+    mitad2 = sour.get_path().vertices[:-2][mitad:,:]
+    mitad3 = np.array(list(reversed(mitad2)))
+    
+    centro1 = int((len(mitad1)/2) - 0.5)
+    centro2 = int((len(mitad2)/2) - 0.5)
+    internopos = mitad2[centro2]
+    etiquetapos = mitad1[centro1]
+    
+    return sour, mitad3, etiquetapos, mitad1
+def source2(radio = 1, theta1 = 0, theta2 = 45, width = 10, sep = 0.05, color = 'red'):
+
+    #............................................
+    sour2 = mpatches.Wedge((0, 0), # centro
+                           radio*(1-(width/100)), # radio
+                           theta1, # angulo inicial
+                           theta2, # angulo final
+                           width=sep, # ancho el 10% del radio
+                           facecolor=color, zorder = 1, lw = 0, ec = color)
+    mitadd = int(len(sour2.get_path().vertices[:-2])/2)
+    mitad11 = sour2.get_path().vertices[:-2][:mitadd,:]
+    mitad22 = sour2.get_path().vertices[:-2][mitadd:,:]
+    mitad33 = np.array(list(reversed(mitad22)))
+    
+    centro11 = int((len(mitad11)/2) - 0.5)
+    centro22 = int((len(mitad22)/2) - 0.5)
+    internopos = mitad22[centro22]
+    
+    return sour2, mitad33, internopos
+def LOCATIONS(source, target):
+    """
+    source: array con posiciones del origen
+    target: arreglo con posiciones hacia el destino
+    """
+    Path = mpath.Path
+    path_data = []
+    path_data.append(tuple([Path.MOVETO, tuple(source[0])]))
+    for i in source[1:-1]:
+        path_data.append(tuple([Path.CURVE3, tuple(i)]))
+    path_data.append(tuple([Path.LINETO, tuple(source[-1])]))
+    path_data.append(tuple([Path.CURVE3, (0,  0)]))
+    path_data.append(tuple([Path.LINETO, tuple(target[0])]))
+    for j in target[1:-1]:
+        path_data.append(tuple([Path.CURVE3, tuple(j)]))
+    path_data.append(tuple([Path.LINETO, tuple(target[-1])]))
+    path_data.append(tuple([Path.CURVE3, (0,  0)]))
+    path_data.append(tuple([Path.LINETO, tuple(source[0])]))
+    return path_data
+
+
+
+
+
+
 from tkinter import ttk
 
 def chord_plot(title_kit = ''):
