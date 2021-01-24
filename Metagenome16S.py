@@ -2399,6 +2399,7 @@ samselOUT = widgets.interactive_output(samsel, {'Sample_Select':Sample_Select, '
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+from tkinter import ttk
 
 def chord_plot(title_kit = ''):
     if title_kit in ['No_Kit', 'Both']:
