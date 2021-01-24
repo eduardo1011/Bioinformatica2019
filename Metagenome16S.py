@@ -2400,6 +2400,1744 @@ samselOUT = widgets.interactive_output(samsel, {'Sample_Select':Sample_Select, '
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+def chord_plot(title_kit = ''):
+    if title_kit in ['No_Kit', 'Both']:
+        pass 
+    else:
+        
+    
+        from collections import Counter
+        import matplotlib
+        import matplotlib.path as mpath
+        import matplotlib.patches as mpatches
+        import ctypes
+
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
+
+        import datetime
+        sumary111 = []
+        uno = open('Anexos16S/AAbundancEE.txt', 'r')
+        for enu, line in enumerate(uno):
+            line = line.rstrip()
+            if enu == 0:
+                header = line.split('\t')
+            else:
+                sumary111.append(line.split('\t'))
+        uno.close()
+        sumary2 = DataFrame(sumary111, columns = header)
+        sumary2 = sumary2.set_index('Sample')
+        sumary2 = sumary2.astype('float64')
+
+        rangonumeros = np.arange(len(sumary2.columns))
+        serie = dict(zip(sumary2.columns, rangonumeros))
+
+        cnorm = mpl.colors.Normalize(vmin=min(list(serie.values())), vmax=max(list(serie.values())))
+        cpick = cm.ScalarMappable(norm=cnorm, cmap=Rampas2.value)
+
+        cpick.set_array([])
+        val_map = {}
+        for k, v in zip(list(serie.keys()), list(serie.values())):
+            val_map[k] = cpick.to_rgba(v)
+        colors = [] # rgb
+        CorrepondenciA = {} # hex
+        for node in list(serie.keys()):
+            colors.append(val_map[node])
+            CorrepondenciA[node] = to_hex(val_map[node]) # correspondencia de colores de acuerdo al stacked plot
+
+        with open('Anexos16S/dictionaries2.json', 'r') as fp:
+            oooo = json.load(fp) 
+        variedad = oooo[0]
+        procesado = oooo[1]
+        cultivo = oooo[2]
+        tiempo_secado = oooo[3]
+        unicos = [str(x) for x in sorted([int(i) for i in tiempo_secado])]
+        tiempo_secado = dict(zip(unicos, [tiempo_secado[j] for j in unicos]))
+
+        kit = oooo[4]
+        ota = oooo[5]
+        unicos2 = [str(x) for x in sorted([float(i) for i in ota])]
+        ota = dict(zip(unicos2, [ota[j] for j in unicos2]))
+
+        # dict dos niveles
+        VaRiAbLeS = {'OTA':ota,
+                     'Time_Dry':tiempo_secado,
+                     'Cultivation':cultivo,
+                     'Processing':procesado,
+                     'Coffee_Variety':variedad}
+
+        samples_variables = DataFrame(sumary2.index.tolist(), columns = ['Sample']).merge(Sampledata, on = 'Sample', how = 'left')
+
+        SamplE_variedad = dict(zip(samples_variables.Sample, samples_variables.Coffee_Variety))
+        SamplE_procesado = dict(zip(samples_variables.Sample, samples_variables.Processing))
+        SamplE_cultivo = dict(zip(samples_variables.Sample, samples_variables.Cultivation))
+        SamplE_tiempo_secado = dict(zip(samples_variables.Sample, samples_variables.Time_Dry))
+        SamplE_ota = dict(zip(samples_variables.Sample, samples_variables.OTA))
+
+        sssuuu = sumary2
+        sssuuu = sssuuu.drop(columns = 'Others')
+
+        origenes = sssuuu.columns.tolist()
+        destinos = sssuuu.index.tolist()
+        net = []
+        for j in sssuuu.columns:
+            a = sssuuu[[j]]
+            a = a[a[j] > 0].index.tolist()
+            for x in a:
+                net.append(tuple([j, x]))
+        Counts_SOURCE = dict(Counter([SOURCE for SOURCE, TARGET in net]))
+        #print(Counts_SOURCE)
+        Counts_TARGET = dict(Counter([TARGET for SOURCE, TARGET in net]))
+        #print(Counts_TARGET)
+        origenes_colors = dict(zip(origenes, tab20+tab20))
+        pal_max_origenes = max([len(i) for i in origenes])
+        pal_max_destinos = max([len(i) for i in destinos])
+
+
+
+
+
+        #**************************************************************************
+
+        root= tk.Tk()
+        root.title("Sample Data")
+        root.geometry("1000x750")
+        root.configure(background='white')
+        root.attributes("-topmost", True)
+
+
+        cero = Label(root, text='Settings', font=("Arial", 10,  "bold"), fg = 'black', bg = 'gainsboro')
+        cero.grid(column=0, row=0, sticky = 'WES')
+
+
+        #-------------------------------------
+        def on_select(event):
+
+
+            mpl.rcParams.update(mpl.rcParamsDefault)
+
+            fig = plt.figure(figsize=(7, 7))
+
+            bar1 = FigureCanvasTkAgg(fig, group_aspect)
+            bar1.draw()
+            bar1.get_tk_widget().grid(row=0, column = 0)#, rowspan=7, columnspan = 7
+
+
+            ax = fig.add_axes([0, 0, 1, 1])
+            ax.set_aspect('equal', 'box')
+
+            sources_label = 1.36
+            targets_label = 1.58
+
+            radio = float(radio_source.get())
+            sepp = float(source_espacio.get())
+            ancho = source_width.get() # % del ancho
+            #tam = 5
+            Espacio = float(source_interespacio.get())
+
+            constante = opening_source.get() - len(origenes)
+            tam = constante / len(origenes) # 
+
+            W = tam * len(origenes)
+
+            Q = (Espacio * len(origenes)) - Espacio
+            sour_inicial = 360 - ((W + Q)/ 2)
+            #sour_inicial = 360 - 90
+
+            """
+            Nodos de Sources sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+            """
+            nodos_ori_0 = {}
+            dif0 = 360 - ((W + Q)/ 2)
+            dif1 = dif0 # inicio de los nodos
+            record_ori_0 = {}
+
+            for o in origenes:
+                teta1 = dif0
+                teta2 = dif0+tam
+
+                sour, mitad3, etiquetapos, mitad1 = source1(radio = radio, theta1 = teta1, theta2 = teta2,
+                                                         width = radio*(ancho/100), sep = sepp, color = CorrepondenciA[o])
+                ax.add_patch(sour)
+                record_ori_0[o] = [teta1, teta2]
+
+                central_angle0 = (((dif0+tam)-dif0)/2)+dif0
+                central_angle = (central_angle0*np.pi)/180
+                if etiquetapos[0] < 0:
+                    central_angle = central_angle - np.pi
+                    if len(o) < pal_max_origenes:
+                        tam_pal = len(o)
+                        palabra = ' '*(pal_max_origenes - tam_pal)+o
+                        palabra = palabra+' '*len(palabra)+' '
+                    else:
+                        palabra = o
+                        palabra = palabra+' '*len(palabra)+' '
+                else:
+                    central_angle = (central_angle0*np.pi)/180
+                    if len(o) < pal_max_origenes:
+                        tam_pal = len(o)
+                        palabra = o+' '*(pal_max_origenes - tam_pal)
+                        palabra = ' '*len(palabra)+' '+palabra
+                    else:
+                        palabra = o
+                        palabra = ' '*len(palabra)+' '+palabra
+
+
+                ax.text(etiquetapos[0], etiquetapos[1], palabra, color = 'black',
+                        va = 'center', ha = 'center', #fontweight = 'bold',
+                        fontsize = source_letra.get(), rotation = np.rad2deg(central_angle),
+                        family = 'monospace', style='italic')
+                #ax.scatter(etiquetapos[0], etiquetapos[1], s = 50, c = 'black', zorder = 2)
+
+                if Counts_SOURCE[o] == 1:
+                    t1 = dif1
+                    t2 = dif1+tam
+                    sour2, mitad33, internopos = source2(radio = radio, theta1 = t1, theta2 = t2,
+                                                         width = ancho, sep = sepp, color = 'white')
+                    ax.add_patch(sour2)
+                    nodos_ori_0[o] = [sour2, mitad33, internopos]
+                    dif1 += (tam+Espacio)
+                else:
+                    t1 = dif1
+                    sectores = tam/Counts_SOURCE[o]
+                    ss0 = 0
+                    ss1 = sectores
+                    intersecciones_ori = []
+                    for r in range(Counts_SOURCE[o]):
+                        t1 = ss0+dif1
+                        t2 = ss1+dif1
+                        sour2, mitad33, internopos = source2(radio = radio, theta1 = t1, theta2 = t2,
+                                                             width = ancho, sep = sepp, color = 'white')
+
+                        ax.add_patch(sour2)
+                        intersecciones_ori.append([sour2, mitad33, internopos])
+
+                        ss1 += sectores
+                        ss0 += sectores
+                    nodos_ori_0[o] = intersecciones_ori
+                    dif1 += (tam+Espacio)
+
+                PER = 2
+                central_angle = (((dif0+tam)-dif0)/2)+dif0
+
+                dif0 += (tam+Espacio)
+
+            """
+            Nodos de Targets ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
+            """   
+            #----------
+            # angulo de separacion elegido
+
+            angulo_espacio = SEP.get()
+
+            continuacion = dif0 - Espacio - 360
+            Espacio2 = float(target_interespacio.get())
+
+            if angulo_espacio > 0:
+                dif00 = angulo_espacio + continuacion
+                tam2 = ((sour_inicial-angulo_espacio)-(continuacion+angulo_espacio) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+            else:
+                tam2 = ((sour_inicial-continuacion) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+                dif00 = continuacion
+
+            nodos_des_0 = {}
+
+            ANGULOS = []
+            nodos_des_1 = {}
+            #dif00 = continuacion
+            dif11 = dif00
+            #tam2 = ((sour_inicial-continuacion) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+
+            radio2 = float(radio_target.get())
+
+            sepp2 = float(target_espacio.get())
+
+            ancho2 = target_width.get()
+
+            radio3 = radio2+sepp2+(radio2*(ancho2/100))
+            radio4 = radio3+sepp2+(radio2*(ancho2/100))
+            radio5 = radio4+sepp2+(radio2*(ancho2/100))
+            radio6 = radio5+sepp2+(radio2*(ancho2/100))
+
+            for o in destinos:
+
+                teta11 = dif11
+                teta22 = dif11+tam2
+
+                if target_width.get() == 0:
+                    sour0000, mitad22222, etiquetapos0000, mitad11111 = source1(radio = radio2, theta1 = teta11, theta2 = teta22,
+                                                         width = radio2*(10/100), sep = 0.02, color = 'black')
+                    ax.add_patch(sour0000)
+
+
+
+                if target_width.get() > 0:
+                    sour, mitad2, etiquetapos, mitad1 = source1(radio = radio2, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = variedad[SamplE_variedad[o]])
+                    ax.add_patch(sour)
+
+                    #####
+                    sour0, mitad22, etiquetapos0, mitad11 = source1(radio = radio3, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = procesado[SamplE_procesado[o]])
+                    ax.add_patch(sour0)
+
+
+                    sour00, mitad222, etiquetapos00, mitad111 = source1(radio = radio4, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = cultivo[SamplE_cultivo[o]])
+                    ax.add_patch(sour00)
+
+                    sour000, mitad2222, etiquetapos000, mitad1111 = source1(radio = radio5, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = tiempo_secado[SamplE_tiempo_secado[o]])
+                    ax.add_patch(sour000)
+
+                    sour0000, mitad22222, etiquetapos0000, mitad11111 = source1(radio = radio6, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = ota[SamplE_ota[o]])
+                    ax.add_patch(sour0000)
+
+                    if o == destinos[0]:
+                        nodos_des_0[o] = [[mitad1, mitad2], [mitad11, mitad22],
+                                          [mitad111, mitad222], [mitad1111, mitad2222],
+                                          [mitad11111, mitad22222]]
+
+
+                #####
+                central_angle0 = (((dif00+tam2)-dif00)/2)+dif00
+                central_angle = (central_angle0*np.pi)/180
+
+
+                if etiquetapos0000[0] < 0:
+                    central_angle = central_angle - np.pi
+                    if len(o) < pal_max_destinos:
+                        tam_pal = len(o)
+                        palabra = ' '*(pal_max_destinos - tam_pal)+o
+                        palabra = palabra+' '+' '*len(palabra)
+                    else:
+                        palabra = o
+                        palabra = palabra+' '+' '*len(palabra)
+
+                else:
+                    central_angle = (central_angle0*np.pi)/180
+                    if len(o) < pal_max_destinos:
+                        tam_pal = len(o)
+                        palabra = o+' '*(pal_max_destinos - tam_pal)
+                        palabra = ' '+' '*len(palabra)+palabra
+                    else:
+                        palabra = o
+                        palabra = ' '+' '*len(palabra)+palabra
+
+
+                ANGULOS.append(dif00)
+
+                ax.text(etiquetapos0000[0], etiquetapos0000[1], palabra, color = 'black', va = 'center', ha = 'center', 
+                        fontsize = target_letra.get(), rotation = np.rad2deg(central_angle), family = 'monospace', fontweight='bold')
+                #ax.scatter(etiquetapos33[0], etiquetapos33[1], s = 20, c = 'lime', zorder = 2)
+
+                if target_width.get() == 0:
+                    ancho2 = 10
+                if target_width.get() > 0:
+                    pass
+
+                if Counts_TARGET[o] == 1:
+                    t1 = dif11
+                    t2 = dif11+tam2
+                    sour2, mitad33, internopos = source2(radio = radio2, theta1 = t1, theta2 = t2,
+                                                         width = ancho2, sep = sepp2, color = 'white')
+                    ax.add_patch(sour2)
+                    nodos_des_1[o] = [sour2, mitad33, internopos]
+                    dif11 += (tam2+Espacio2)
+                else:
+                    t1 = dif11
+                    sectores = tam2/Counts_TARGET[o]
+                    ss0 = 0
+                    ss1 = sectores
+                    intersecciones_des = []
+                    for r in range(Counts_TARGET[o]):
+                        t1 = ss0+dif11
+                        t2 = ss1+dif11
+                        sour2, mitad33, internopos = source2(radio = radio2, theta1 = t1, theta2 = t2,
+                                                             width = ancho2, sep = sepp2, color = 'white')
+                        ax.add_patch(sour2)
+                        intersecciones_des.append([sour2, mitad33, internopos])
+                        ss1 += sectores
+                        ss0 += sectores
+                    nodos_des_1[o] = intersecciones_des
+                    dif11 += (tam2+Espacio2)
+
+                central_angle2 = (((dif00+tam2)-dif00)/2)+dif00
+                radian2 = (central_angle2*np.pi)/180
+                x2 = (radio2 * (1-((ancho2/2)/100))) *  np.cos(radian2)
+                y2 = (radio2 * (1-((ancho2/2)/100))) *  np.sin(radian2)
+                #ax.scatter(x2, y2, s = 10, c = 'black', zorder = 2)
+
+                dif00 += (tam2+Espacio2)
+
+            """
+            Conexiones ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+            """
+            #---------------
+            # parte 1
+            XX = []
+            for ori in origenes:
+                xu = 0
+                if Counts_SOURCE[ori] == 1:
+                    for SOURCE, TARGET in net:
+                        if ori == SOURCE:
+                            if Counts_TARGET[TARGET] == 1:  # target uno
+                                #print('>>>', SOURCE, TARGET)
+                                path_data = LOCATIONS(nodos_ori_0[SOURCE][1], nodos_des_1[TARGET][1])
+
+                                codes, verts = zip(*path_data)
+                                path = mpath.Path(verts, codes)
+                                patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[ori], alpha=1, lw = None, ec = 'none', zorder = 0)
+                                ax.add_patch(patch)
+                            else: # target con mas de uno
+                                XX.append([SOURCE, 'NA', TARGET])
+                else:
+                    for SOURCE, TARGET in net:
+                        if ori == SOURCE:
+                            #print(SOURCE, xu, TARGET)
+                            if Counts_TARGET[TARGET] == 1:
+                                #print(SOURCE, xu, TARGET, '----')
+                                path_data = LOCATIONS(nodos_ori_0[SOURCE][xu][1], nodos_des_1[TARGET][1])
+                                codes, verts = zip(*path_data)
+                                path = mpath.Path(verts, codes)
+                                patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[ori], alpha=1, lw = None, ec = 'none', zorder = 0)
+                                ax.add_patch(patch)
+                            else: # target con mas de uno
+                                XX.append([SOURCE, xu, TARGET])
+                            xu += 1
+
+            #---------------
+            # Parte 2
+            output = []
+            for SOURCE, P, TARGET in XX:
+                if TARGET not in output:
+                    output.append(TARGET)
+
+            for s in output:
+                n = 0
+                for SOURCE, P, TARGET in XX:
+                    if s == TARGET:
+                        if P == 'NA':
+                            path_data = LOCATIONS(nodos_ori_0[SOURCE][1], nodos_des_1[TARGET][n][1])
+
+                            codes, verts = zip(*path_data)
+                            path = mpath.Path(verts, codes)
+                            patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[SOURCE], alpha=1, lw = None, ec = 'none', zorder = 0)
+                            ax.add_patch(patch)
+                        else:
+                            path_data = LOCATIONS(nodos_ori_0[SOURCE][P][1], nodos_des_1[TARGET][n][1])
+
+                            codes, verts = zip(*path_data)
+                            path = mpath.Path(verts, codes)
+                            patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[SOURCE], alpha=1, lw = None, ec = 'none', zorder = 0)
+                            ax.add_patch(patch)
+                        n += 1 
+            if mostrar_vari.get() == 'True':
+                if target_width.get() > 3:
+                    for i, j in zip(nodos_des_0[destinos[0]], ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'OTA']):
+                        ax.text(np.sum(i[0][0][0]+i[1][0][0])/2, np.sum(i[0][0][1]+i[1][0][1])/2,
+                                ' '*len(j)+' '+j, color = 'black', ha = 'center',va = 'center',  
+                                fontsize = 7, rotation = ((continuacion+angulo_espacio)-90)-2, family = 'monospace')
+            if mostrar_vari.get() == 'False':
+                pass
+            ##
+            if mostrar_leyenda.get() == 'True':
+                yy = 1.7
+                for var in VaRiAbLeS:
+                    xx = -1.9
+                    for e, j in enumerate(VaRiAbLeS[var]):
+                        ax.scatter(xx, yy, s = leyenda_size.get(), c = VaRiAbLeS[var][j], marker = 's')
+                        xx +=0.07
+                    ax.text(xx, yy, var, ha = 'left', va = 'center', fontsize = leyenda_letra.get())
+                    yy -= 0.1
+            if mostrar_leyenda.get() == 'False':
+                pass
+
+            ax.text(-0.3, 1.9, title_kit, ha = 'center', va = 'center', fontsize = 15, weight = 'bold')
+
+            ax.set_xlim(-float(lim_xy.get()), float(lim_xy.get()))
+            ax.set_ylim(-float(lim_xy.get()), float(lim_xy.get()))
+            ax.axis('off')
+
+
+            plt.close()
+        ###############
+
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero1 = Label(root, text='Separation', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero1.grid(column=0, row=1, sticky = 'WES')
+        tamanos = list(range(5,101))
+        SEP = IntVar()
+        separacion = ttk.Combobox(root, textvariable = SEP, font=("Arial", 8),
+                             values = tamanos, width=8)
+        separacion.grid(column=1, row=1, sticky= 'SW')
+        separacion.bind('<<ComboboxSelected>>', on_select)
+        separacion.current(55)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero2 = Label(root, text='Margins', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero2.grid(column=0, row=2, sticky = 'WES')
+        limites = ['2', '2.5', '3', '3.5', '4']
+        lim_xy = StringVar()
+        margins = ttk.Combobox(root, textvariable = lim_xy, font=("Arial", 8),
+                             values = limites, width=8)
+        margins.grid(column=1, row=2, sticky= 'SW')
+        margins.bind('<<ComboboxSelected>>', on_select)
+        margins.current(0)
+
+
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero1 = Label(root, text='Source settings', font=("Arial", 8, 'bold'), fg = 'black', bg = 'cyan')
+        cero1.grid(column=0, row=3, sticky = 'WES')
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero1 = Label(root, text='Source opening', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero1.grid(column=0, row=4, sticky = 'WES')
+        apertura = list(range(20,181))
+        opening_source = IntVar()
+        abertura = ttk.Combobox(root, textvariable = opening_source, font=("Arial", 8),
+                             values = apertura, width=8)
+        abertura.grid(column=1, row=4, sticky= 'SW')
+        abertura.bind('<<ComboboxSelected>>', on_select)
+        abertura.current(160)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero00 = Label(root, text='Source radio', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero00.grid(column=0, row=5, sticky = 'WES')
+        radio_fuente = ['0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0','1.1','1.2','1.3','1.4','1.5']
+        radio_source = StringVar()
+        source_radio = ttk.Combobox(root, textvariable = radio_source, font=("Arial", 8),
+                             values = radio_fuente, width=8)
+        source_radio.grid(column=1, row=5, sticky= 'SW')
+        source_radio.bind('<<ComboboxSelected>>', on_select)
+        source_radio.current(9)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero3 = Label(root, text='Source width', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero3.grid(column=0, row=6, sticky = 'WES')
+        ancho_sources = list(range(0,51))
+        source_width = IntVar()
+        source_ancho = ttk.Combobox(root, textvariable = source_width, font=("Arial", 8),
+                             values = ancho_sources, width=8)
+        source_ancho.grid(column=1, row=6, sticky= 'SW')
+        source_ancho.bind('<<ComboboxSelected>>', on_select)
+        source_ancho.current(7)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero4 = Label(root, text='Source fontsize', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero4.grid(column=0, row=7, sticky = 'WES')
+        letra_source = list(range(2,21))
+        source_letra = IntVar()
+        source_fontsize = ttk.Combobox(root, textvariable = source_letra, font=("Arial", 8),
+                             values = letra_source, width=8)
+        source_fontsize.grid(column=1, row=7, sticky= 'SW')
+        source_fontsize.bind('<<ComboboxSelected>>', on_select)
+        source_fontsize.current(7)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero4 = Label(root, text='Source space', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero4.grid(column=0, row=8, sticky = 'WES')
+        espacio_source = ['0', '0.01', '0.025', '0.05', '0.075', '0.1', '0.11', '0.125', '0.15', '0.175', '0.2']
+        source_espacio = StringVar()
+        source_space = ttk.Combobox(root, textvariable = source_espacio, font=("Arial", 8),
+                             values = espacio_source, width=8)
+        source_space.grid(column=1, row=8, sticky= 'SW')
+        source_space.bind('<<ComboboxSelected>>', on_select)
+        source_space.current(1)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero4 = Label(root, text='Source interspace', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero4.grid(column=0, row=9, sticky = 'WES')
+        interespacio_source = ['0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1',
+                               '1.1', '1.2', '1.3', '1.4', '1.5']
+        source_interespacio = StringVar()
+        source_interspace = ttk.Combobox(root, textvariable = source_interespacio, font=("Arial", 8),
+                             values = interespacio_source, width=8)
+        source_interspace.grid(column=1, row=9, sticky= 'SW')
+        source_interspace.bind('<<ComboboxSelected>>', on_select)
+        source_interspace.current(5)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+        cero1 = Label(root, text='Target settings', font=("Arial", 8, 'bold'), fg = 'black', bg = 'cyan')
+        cero1.grid(column=0, row=10, sticky = 'WES')
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero00 = Label(root, text='Target radio', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero00.grid(column=0, row=11, sticky = 'WES')
+        radio_destino = ['0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0','1.1','1.2','1.3','1.4','1.5']
+        radio_target = StringVar()
+        target_radio = ttk.Combobox(root, textvariable = radio_target, font=("Arial", 8),
+                             values = radio_destino, width=8)
+        target_radio.grid(column=1, row=11, sticky= 'SW')
+        target_radio.bind('<<ComboboxSelected>>', on_select)
+        target_radio.current(9)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero5 = Label(root, text='Target width', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero5.grid(column=0, row=12, sticky = 'WES')
+        ancho_targets = list(range(0,51))
+        target_width = IntVar()
+        target_ancho = ttk.Combobox(root, textvariable = target_width, font=("Arial", 8),
+                             values = ancho_targets, width=8)
+        target_ancho.grid(column=1, row=12, sticky= 'SW')
+        target_ancho.bind('<<ComboboxSelected>>', on_select)
+        target_ancho.current(7)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero6 = Label(root, text='Target fontsize', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero6.grid(column=0, row=13, sticky = 'WES')
+        letra_target = list(range(2,21))
+        target_letra = IntVar()
+        target_fontsize = ttk.Combobox(root, textvariable = target_letra, font=("Arial", 8),
+                             values = letra_source, width=8)
+        target_fontsize.grid(column=1, row=13, sticky= 'SW')
+        target_fontsize.bind('<<ComboboxSelected>>', on_select)
+        target_fontsize.current(7)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero4 = Label(root, text='Target space', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero4.grid(column=0, row=14, sticky = 'WES')
+        espacio_target = ['0', '0.01', '0.025', '0.05', '0.075', '0.1', '0.11', '0.125', '0.15', '0.175', '0.2']
+        target_espacio = StringVar()
+        target_space = ttk.Combobox(root, textvariable = target_espacio, font=("Arial", 8),
+                             values = espacio_target, width=8)
+        target_space.grid(column=1, row=14, sticky= 'SW')
+        target_space.bind('<<ComboboxSelected>>', on_select)
+        target_space.current(1)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero4 = Label(root, text='Target interspace', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero4.grid(column=0, row=15, sticky = 'WES')
+        interespacio_target = ['0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1',
+                               '1.1', '1.2', '1.3', '1.4', '1.5']
+        target_interespacio = StringVar()
+        target_interspace = ttk.Combobox(root, textvariable = target_interespacio, font=("Arial", 8),
+                             values = interespacio_target, width=8)
+        target_interspace.grid(column=1, row=15, sticky= 'SW')
+        target_interspace.bind('<<ComboboxSelected>>', on_select)
+        target_interspace.current(5)
+
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+        cero1 = Label(root, text='Legend settings', font=("Arial", 8, 'bold'), fg = 'black', bg = 'cyan')
+        cero1.grid(column=0, row=16, sticky = 'WES')
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero00 = Label(root, text='Show legend', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero00.grid(column=0, row=17, sticky = 'WES')
+        leyenda = ['True', 'False']
+        mostrar_leyenda = StringVar()
+        ley = ttk.Combobox(root, textvariable = mostrar_leyenda, font=("Arial", 8),
+                             values = leyenda, width=8)
+        ley.grid(column=1, row=17, sticky= 'SW')
+        ley.bind('<<ComboboxSelected>>', on_select)
+        ley.current(0)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero6 = Label(root, text='Legend fontsize', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero6.grid(column=0, row=18, sticky = 'WES')
+        letra_leyenda = list(range(2,16))
+        leyenda_letra = IntVar()
+        leyenda_fontsize = ttk.Combobox(root, textvariable = leyenda_letra, font=("Arial", 8),
+                             values = letra_leyenda, width=8)
+        leyenda_fontsize.grid(column=1, row=18, sticky= 'SW')
+        leyenda_fontsize.bind('<<ComboboxSelected>>', on_select)
+        leyenda_fontsize.current(6)
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero6 = Label(root, text='Marker size', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero6.grid(column=0, row=19, sticky = 'WES')
+        size_leyenda = list(range(2,51))
+        leyenda_size = IntVar()
+        ley_size = ttk.Combobox(root, textvariable = leyenda_size, font=("Arial", 8),
+                             values = size_leyenda, width=8)
+        ley_size.grid(column=1, row=19, sticky= 'SW')
+        ley_size.bind('<<ComboboxSelected>>', on_select)
+        ley_size.current(33)
+
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero00 = Label(root, text='Variable name', font=("Arial", 8), fg = 'white', bg = 'darkblue')
+        cero00.grid(column=0, row=20, sticky = 'WES')
+        vari = ['True', 'False']
+        mostrar_vari = StringVar()
+        vari_in_chord = ttk.Combobox(root, textvariable = mostrar_vari, font=("Arial", 8),
+                             values = vari, width=8)
+        vari_in_chord.grid(column=1, row=20, sticky= 'SW')
+        vari_in_chord.bind('<<ComboboxSelected>>', on_select)
+        vari_in_chord.current(0)
+
+
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        cero1 = Label(root, text='Save plot', font=("Arial", 8, 'bold'), fg = 'black', bg = 'cyan')
+        cero1.grid(column=0, row=21, sticky = 'WES')
+
+
+        #-------------------------------------
+        #-------------------------------------
+        def on_select2():
+
+
+            mpl.rcParams.update(mpl.rcParamsDefault)
+
+            fig = plt.figure(figsize=(7, 7))
+
+            bar1 = FigureCanvasTkAgg(fig, group_aspect)
+            bar1.draw()
+            bar1.get_tk_widget().grid(row=0, column = 0)#, rowspan=7, columnspan = 7
+
+
+            ax = fig.add_axes([0, 0, 1, 1])
+            ax.set_aspect('equal', 'box')
+
+            sources_label = 1.36
+            targets_label = 1.58
+
+            radio = float(radio_source.get())
+            sepp = float(source_espacio.get())
+            ancho = source_width.get() # % del ancho
+            #tam = 5
+            Espacio = float(source_interespacio.get())
+
+            constante = opening_source.get() - len(origenes)
+            tam = constante / len(origenes) # 
+
+            W = tam * len(origenes)
+
+            Q = (Espacio * len(origenes)) - Espacio
+            sour_inicial = 360 - ((W + Q)/ 2)
+            #sour_inicial = 360 - 90
+
+            """
+            Nodos de Sources sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+            """
+            nodos_ori_0 = {}
+            dif0 = 360 - ((W + Q)/ 2)
+            dif1 = dif0 # inicio de los nodos
+            record_ori_0 = {}
+
+            for o in origenes:
+                teta1 = dif0
+                teta2 = dif0+tam
+
+                sour, mitad3, etiquetapos, mitad1 = source1(radio = radio, theta1 = teta1, theta2 = teta2,
+                                                         width = radio*(ancho/100), sep = sepp, color = CorrepondenciA[o])
+                ax.add_patch(sour)
+                record_ori_0[o] = [teta1, teta2]
+
+                central_angle0 = (((dif0+tam)-dif0)/2)+dif0
+                central_angle = (central_angle0*np.pi)/180
+                if etiquetapos[0] < 0:
+                    central_angle = central_angle - np.pi
+                    if len(o) < pal_max_origenes:
+                        tam_pal = len(o)
+                        palabra = ' '*(pal_max_origenes - tam_pal)+o
+                        palabra = palabra+' '*len(palabra)+' '
+                    else:
+                        palabra = o
+                        palabra = palabra+' '*len(palabra)+' '
+                else:
+                    central_angle = (central_angle0*np.pi)/180
+                    if len(o) < pal_max_origenes:
+                        tam_pal = len(o)
+                        palabra = o+' '*(pal_max_origenes - tam_pal)
+                        palabra = ' '*len(palabra)+' '+palabra
+                    else:
+                        palabra = o
+                        palabra = ' '*len(palabra)+' '+palabra
+
+
+                ax.text(etiquetapos[0], etiquetapos[1], palabra, color = 'black',
+                        va = 'center', ha = 'center', #fontweight = 'bold',
+                        fontsize = source_letra.get(), rotation = np.rad2deg(central_angle),
+                        family = 'monospace', style='italic')
+                #ax.scatter(etiquetapos[0], etiquetapos[1], s = 50, c = 'black', zorder = 2)
+
+                if Counts_SOURCE[o] == 1:
+                    t1 = dif1
+                    t2 = dif1+tam
+                    sour2, mitad33, internopos = source2(radio = radio, theta1 = t1, theta2 = t2,
+                                                         width = ancho, sep = sepp, color = 'white')
+                    ax.add_patch(sour2)
+                    nodos_ori_0[o] = [sour2, mitad33, internopos]
+                    dif1 += (tam+Espacio)
+                else:
+                    t1 = dif1
+                    sectores = tam/Counts_SOURCE[o]
+                    ss0 = 0
+                    ss1 = sectores
+                    intersecciones_ori = []
+                    for r in range(Counts_SOURCE[o]):
+                        t1 = ss0+dif1
+                        t2 = ss1+dif1
+                        sour2, mitad33, internopos = source2(radio = radio, theta1 = t1, theta2 = t2,
+                                                             width = ancho, sep = sepp, color = 'white')
+
+                        ax.add_patch(sour2)
+                        intersecciones_ori.append([sour2, mitad33, internopos])
+
+                        ss1 += sectores
+                        ss0 += sectores
+                    nodos_ori_0[o] = intersecciones_ori
+                    dif1 += (tam+Espacio)
+
+                PER = 2
+                central_angle = (((dif0+tam)-dif0)/2)+dif0
+
+                dif0 += (tam+Espacio)
+
+            """
+            Nodos de Targets ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
+            """   
+            #----------
+            # angulo de separacion elegido
+
+            angulo_espacio = SEP.get()
+
+            continuacion = dif0 - Espacio - 360
+            Espacio2 = float(target_interespacio.get())
+
+            if angulo_espacio > 0:
+                dif00 = angulo_espacio + continuacion
+                tam2 = ((sour_inicial-angulo_espacio)-(continuacion+angulo_espacio) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+            else:
+                tam2 = ((sour_inicial-continuacion) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+                dif00 = continuacion
+
+            nodos_des_0 = {}
+
+            ANGULOS = []
+            nodos_des_1 = {}
+            #dif00 = continuacion
+            dif11 = dif00
+            #tam2 = ((sour_inicial-continuacion) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+
+            radio2 = float(radio_target.get())
+
+            sepp2 = float(target_espacio.get())
+
+            ancho2 = target_width.get()
+
+            radio3 = radio2+sepp2+(radio2*(ancho2/100))
+            radio4 = radio3+sepp2+(radio2*(ancho2/100))
+            radio5 = radio4+sepp2+(radio2*(ancho2/100))
+            radio6 = radio5+sepp2+(radio2*(ancho2/100))
+
+            for o in destinos:
+
+                teta11 = dif11
+                teta22 = dif11+tam2
+
+                if target_width.get() == 0:
+                    sour0000, mitad22222, etiquetapos0000, mitad11111 = source1(radio = radio2, theta1 = teta11, theta2 = teta22,
+                                                         width = radio2*(10/100), sep = 0.02, color = 'black')
+                    ax.add_patch(sour0000)
+
+
+
+                if target_width.get() > 0:
+                    sour, mitad2, etiquetapos, mitad1 = source1(radio = radio2, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = variedad[SamplE_variedad[o]])
+                    ax.add_patch(sour)
+
+                    #####
+                    sour0, mitad22, etiquetapos0, mitad11 = source1(radio = radio3, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = procesado[SamplE_procesado[o]])
+                    ax.add_patch(sour0)
+
+
+                    sour00, mitad222, etiquetapos00, mitad111 = source1(radio = radio4, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = cultivo[SamplE_cultivo[o]])
+                    ax.add_patch(sour00)
+
+                    sour000, mitad2222, etiquetapos000, mitad1111 = source1(radio = radio5, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = tiempo_secado[SamplE_tiempo_secado[o]])
+                    ax.add_patch(sour000)
+
+                    sour0000, mitad22222, etiquetapos0000, mitad11111 = source1(radio = radio6, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = ota[SamplE_ota[o]])
+                    ax.add_patch(sour0000)
+
+                    if o == destinos[0]:
+                        nodos_des_0[o] = [[mitad1, mitad2], [mitad11, mitad22],
+                                          [mitad111, mitad222], [mitad1111, mitad2222],
+                                          [mitad11111, mitad22222]]
+
+
+                #####
+                central_angle0 = (((dif00+tam2)-dif00)/2)+dif00
+                central_angle = (central_angle0*np.pi)/180
+
+
+                if etiquetapos0000[0] < 0:
+                    central_angle = central_angle - np.pi
+                    if len(o) < pal_max_destinos:
+                        tam_pal = len(o)
+                        palabra = ' '*(pal_max_destinos - tam_pal)+o
+                        palabra = palabra+' '+' '*len(palabra)
+                    else:
+                        palabra = o
+                        palabra = palabra+' '+' '*len(palabra)
+
+                else:
+                    central_angle = (central_angle0*np.pi)/180
+                    if len(o) < pal_max_destinos:
+                        tam_pal = len(o)
+                        palabra = o+' '*(pal_max_destinos - tam_pal)
+                        palabra = ' '+' '*len(palabra)+palabra
+                    else:
+                        palabra = o
+                        palabra = ' '+' '*len(palabra)+palabra
+
+
+                ANGULOS.append(dif00)
+
+                ax.text(etiquetapos0000[0], etiquetapos0000[1], palabra, color = 'black', va = 'center', ha = 'center', 
+                        fontsize = target_letra.get(), rotation = np.rad2deg(central_angle), family = 'monospace', fontweight='bold')
+                #ax.scatter(etiquetapos33[0], etiquetapos33[1], s = 20, c = 'lime', zorder = 2)
+
+                if target_width.get() == 0:
+                    ancho2 = 10
+                if target_width.get() > 0:
+                    pass
+
+                if Counts_TARGET[o] == 1:
+                    t1 = dif11
+                    t2 = dif11+tam2
+                    sour2, mitad33, internopos = source2(radio = radio2, theta1 = t1, theta2 = t2,
+                                                         width = ancho2, sep = sepp2, color = 'white')
+                    ax.add_patch(sour2)
+                    nodos_des_1[o] = [sour2, mitad33, internopos]
+                    dif11 += (tam2+Espacio2)
+                else:
+                    t1 = dif11
+                    sectores = tam2/Counts_TARGET[o]
+                    ss0 = 0
+                    ss1 = sectores
+                    intersecciones_des = []
+                    for r in range(Counts_TARGET[o]):
+                        t1 = ss0+dif11
+                        t2 = ss1+dif11
+                        sour2, mitad33, internopos = source2(radio = radio2, theta1 = t1, theta2 = t2,
+                                                             width = ancho2, sep = sepp2, color = 'white')
+                        ax.add_patch(sour2)
+                        intersecciones_des.append([sour2, mitad33, internopos])
+                        ss1 += sectores
+                        ss0 += sectores
+                    nodos_des_1[o] = intersecciones_des
+                    dif11 += (tam2+Espacio2)
+
+                central_angle2 = (((dif00+tam2)-dif00)/2)+dif00
+                radian2 = (central_angle2*np.pi)/180
+                x2 = (radio2 * (1-((ancho2/2)/100))) *  np.cos(radian2)
+                y2 = (radio2 * (1-((ancho2/2)/100))) *  np.sin(radian2)
+                #ax.scatter(x2, y2, s = 10, c = 'black', zorder = 2)
+
+                dif00 += (tam2+Espacio2)
+
+            """
+            Conexiones ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+            """
+            #---------------
+            # parte 1
+            XX = []
+            for ori in origenes:
+                xu = 0
+                if Counts_SOURCE[ori] == 1:
+                    for SOURCE, TARGET in net:
+                        if ori == SOURCE:
+                            if Counts_TARGET[TARGET] == 1:  # target uno
+                                #print('>>>', SOURCE, TARGET)
+                                path_data = LOCATIONS(nodos_ori_0[SOURCE][1], nodos_des_1[TARGET][1])
+
+                                codes, verts = zip(*path_data)
+                                path = mpath.Path(verts, codes)
+                                patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[ori], alpha=1, lw = None, ec = 'none', zorder = 0)
+                                ax.add_patch(patch)
+                            else: # target con mas de uno
+                                XX.append([SOURCE, 'NA', TARGET])
+                else:
+                    for SOURCE, TARGET in net:
+                        if ori == SOURCE:
+                            #print(SOURCE, xu, TARGET)
+                            if Counts_TARGET[TARGET] == 1:
+                                #print(SOURCE, xu, TARGET, '----')
+                                path_data = LOCATIONS(nodos_ori_0[SOURCE][xu][1], nodos_des_1[TARGET][1])
+                                codes, verts = zip(*path_data)
+                                path = mpath.Path(verts, codes)
+                                patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[ori], alpha=1, lw = None, ec = 'none', zorder = 0)
+                                ax.add_patch(patch)
+                            else: # target con mas de uno
+                                XX.append([SOURCE, xu, TARGET])
+                            xu += 1
+
+            #---------------
+            # Parte 2
+            output = []
+            for SOURCE, P, TARGET in XX:
+                if TARGET not in output:
+                    output.append(TARGET)
+
+            for s in output:
+                n = 0
+                for SOURCE, P, TARGET in XX:
+                    if s == TARGET:
+                        if P == 'NA':
+                            path_data = LOCATIONS(nodos_ori_0[SOURCE][1], nodos_des_1[TARGET][n][1])
+
+                            codes, verts = zip(*path_data)
+                            path = mpath.Path(verts, codes)
+                            patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[SOURCE], alpha=1, lw = None, ec = 'none', zorder = 0)
+                            ax.add_patch(patch)
+                        else:
+                            path_data = LOCATIONS(nodos_ori_0[SOURCE][P][1], nodos_des_1[TARGET][n][1])
+
+                            codes, verts = zip(*path_data)
+                            path = mpath.Path(verts, codes)
+                            patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[SOURCE], alpha=1, lw = None, ec = 'none', zorder = 0)
+                            ax.add_patch(patch)
+                        n += 1 
+            if mostrar_vari.get() == 'True':
+                if target_width.get() > 3:
+                    for i, j in zip(nodos_des_0[destinos[0]], ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'OTA']):
+                        ax.text(np.sum(i[0][0][0]+i[1][0][0])/2, np.sum(i[0][0][1]+i[1][0][1])/2,
+                                ' '*len(j)+' '+j, color = 'black', ha = 'center',va = 'center',  
+                                fontsize = 7, rotation = ((continuacion+angulo_espacio)-90)-2, family = 'monospace')
+            if mostrar_vari.get() == 'False':
+                pass
+            ##
+            if mostrar_leyenda.get() == 'True':
+                yy = 1.7
+                for var in VaRiAbLeS:
+                    xx = -1.9
+                    for e, j in enumerate(VaRiAbLeS[var]):
+                        ax.scatter(xx, yy, s = leyenda_size.get(), c = VaRiAbLeS[var][j], marker = 's')
+                        xx +=0.07
+                    ax.text(xx, yy, var, ha = 'left', va = 'center', fontsize = leyenda_letra.get())
+                    yy -= 0.1
+            if mostrar_leyenda.get() == 'False':
+                pass
+
+            ax.text(-0.3, 1.9, title_kit, ha = 'center', va = 'center', fontsize = 15, weight = 'bold')
+
+            ax.set_xlim(-float(lim_xy.get()), float(lim_xy.get()))
+            ax.set_ylim(-float(lim_xy.get()), float(lim_xy.get()))
+            ax.axis('off')
+
+            plt.savefig('Plots16S/Chord_'+title_kit+'_'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
+            plt.close()
+        ###############
+        ###############
+
+
+        boton = Button(root, text="PNG", cursor="hand2",
+                    bg="gold", fg="black",font=("Arial", 8), command = on_select2)
+        boton.grid(column = 0, row = 22, sticky = 'WES')
+        #boton.bind('<Button-1>', on_select2)
+
+
+        #-------------------------------------
+        #-------------------------------------
+        def on_select3():
+
+
+            mpl.rcParams.update(mpl.rcParamsDefault)
+
+            fig = plt.figure(figsize=(7, 7))
+
+            bar1 = FigureCanvasTkAgg(fig, group_aspect)
+            bar1.draw()
+            bar1.get_tk_widget().grid(row=0, column = 0)#, rowspan=7, columnspan = 7
+
+
+            ax = fig.add_axes([0, 0, 1, 1])
+            ax.set_aspect('equal', 'box')
+
+            sources_label = 1.36
+            targets_label = 1.58
+
+            radio = float(radio_source.get())
+            sepp = float(source_espacio.get())
+            ancho = source_width.get() # % del ancho
+            #tam = 5
+            Espacio = float(source_interespacio.get())
+
+            constante = opening_source.get() - len(origenes)
+            tam = constante / len(origenes) # 
+
+            W = tam * len(origenes)
+
+            Q = (Espacio * len(origenes)) - Espacio
+            sour_inicial = 360 - ((W + Q)/ 2)
+            #sour_inicial = 360 - 90
+
+            """
+            Nodos de Sources sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+            """
+            nodos_ori_0 = {}
+            dif0 = 360 - ((W + Q)/ 2)
+            dif1 = dif0 # inicio de los nodos
+            record_ori_0 = {}
+
+            for o in origenes:
+                teta1 = dif0
+                teta2 = dif0+tam
+
+                sour, mitad3, etiquetapos, mitad1 = source1(radio = radio, theta1 = teta1, theta2 = teta2,
+                                                         width = radio*(ancho/100), sep = sepp, color = CorrepondenciA[o])
+                ax.add_patch(sour)
+                record_ori_0[o] = [teta1, teta2]
+
+                central_angle0 = (((dif0+tam)-dif0)/2)+dif0
+                central_angle = (central_angle0*np.pi)/180
+                if etiquetapos[0] < 0:
+                    central_angle = central_angle - np.pi
+                    if len(o) < pal_max_origenes:
+                        tam_pal = len(o)
+                        palabra = ' '*(pal_max_origenes - tam_pal)+o
+                        palabra = palabra+' '*len(palabra)+' '
+                    else:
+                        palabra = o
+                        palabra = palabra+' '*len(palabra)+' '
+                else:
+                    central_angle = (central_angle0*np.pi)/180
+                    if len(o) < pal_max_origenes:
+                        tam_pal = len(o)
+                        palabra = o+' '*(pal_max_origenes - tam_pal)
+                        palabra = ' '*len(palabra)+' '+palabra
+                    else:
+                        palabra = o
+                        palabra = ' '*len(palabra)+' '+palabra
+
+
+                ax.text(etiquetapos[0], etiquetapos[1], palabra, color = 'black',
+                        va = 'center', ha = 'center', #fontweight = 'bold',
+                        fontsize = source_letra.get(), rotation = np.rad2deg(central_angle),
+                        family = 'monospace', style='italic')
+                #ax.scatter(etiquetapos[0], etiquetapos[1], s = 50, c = 'black', zorder = 2)
+
+                if Counts_SOURCE[o] == 1:
+                    t1 = dif1
+                    t2 = dif1+tam
+                    sour2, mitad33, internopos = source2(radio = radio, theta1 = t1, theta2 = t2,
+                                                         width = ancho, sep = sepp, color = 'white')
+                    ax.add_patch(sour2)
+                    nodos_ori_0[o] = [sour2, mitad33, internopos]
+                    dif1 += (tam+Espacio)
+                else:
+                    t1 = dif1
+                    sectores = tam/Counts_SOURCE[o]
+                    ss0 = 0
+                    ss1 = sectores
+                    intersecciones_ori = []
+                    for r in range(Counts_SOURCE[o]):
+                        t1 = ss0+dif1
+                        t2 = ss1+dif1
+                        sour2, mitad33, internopos = source2(radio = radio, theta1 = t1, theta2 = t2,
+                                                             width = ancho, sep = sepp, color = 'white')
+
+                        ax.add_patch(sour2)
+                        intersecciones_ori.append([sour2, mitad33, internopos])
+
+                        ss1 += sectores
+                        ss0 += sectores
+                    nodos_ori_0[o] = intersecciones_ori
+                    dif1 += (tam+Espacio)
+
+                PER = 2
+                central_angle = (((dif0+tam)-dif0)/2)+dif0
+
+                dif0 += (tam+Espacio)
+
+            """
+            Nodos de Targets ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
+            """   
+            #----------
+            # angulo de separacion elegido
+
+            angulo_espacio = SEP.get()
+
+            continuacion = dif0 - Espacio - 360
+            Espacio2 = float(target_interespacio.get())
+
+            if angulo_espacio > 0:
+                dif00 = angulo_espacio + continuacion
+                tam2 = ((sour_inicial-angulo_espacio)-(continuacion+angulo_espacio) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+            else:
+                tam2 = ((sour_inicial-continuacion) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+                dif00 = continuacion
+
+            nodos_des_0 = {}
+
+            ANGULOS = []
+            nodos_des_1 = {}
+            #dif00 = continuacion
+            dif11 = dif00
+            #tam2 = ((sour_inicial-continuacion) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+
+            radio2 = float(radio_target.get())
+
+            sepp2 = float(target_espacio.get())
+
+            ancho2 = target_width.get()
+
+            radio3 = radio2+sepp2+(radio2*(ancho2/100))
+            radio4 = radio3+sepp2+(radio2*(ancho2/100))
+            radio5 = radio4+sepp2+(radio2*(ancho2/100))
+            radio6 = radio5+sepp2+(radio2*(ancho2/100))
+
+            for o in destinos:
+
+                teta11 = dif11
+                teta22 = dif11+tam2
+
+                if target_width.get() == 0:
+                    sour0000, mitad22222, etiquetapos0000, mitad11111 = source1(radio = radio2, theta1 = teta11, theta2 = teta22,
+                                                         width = radio2*(10/100), sep = 0.02, color = 'black')
+                    ax.add_patch(sour0000)
+
+
+
+                if target_width.get() > 0:
+                    sour, mitad2, etiquetapos, mitad1 = source1(radio = radio2, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = variedad[SamplE_variedad[o]])
+                    ax.add_patch(sour)
+
+                    #####
+                    sour0, mitad22, etiquetapos0, mitad11 = source1(radio = radio3, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = procesado[SamplE_procesado[o]])
+                    ax.add_patch(sour0)
+
+
+                    sour00, mitad222, etiquetapos00, mitad111 = source1(radio = radio4, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = cultivo[SamplE_cultivo[o]])
+                    ax.add_patch(sour00)
+
+                    sour000, mitad2222, etiquetapos000, mitad1111 = source1(radio = radio5, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = tiempo_secado[SamplE_tiempo_secado[o]])
+                    ax.add_patch(sour000)
+
+                    sour0000, mitad22222, etiquetapos0000, mitad11111 = source1(radio = radio6, theta1 = teta11, theta2 = teta22,
+                                                             width = radio2*(ancho2/100), sep = sepp2, color = ota[SamplE_ota[o]])
+                    ax.add_patch(sour0000)
+
+                    if o == destinos[0]:
+                        nodos_des_0[o] = [[mitad1, mitad2], [mitad11, mitad22],
+                                          [mitad111, mitad222], [mitad1111, mitad2222],
+                                          [mitad11111, mitad22222]]
+
+
+                #####
+                central_angle0 = (((dif00+tam2)-dif00)/2)+dif00
+                central_angle = (central_angle0*np.pi)/180
+
+
+                if etiquetapos0000[0] < 0:
+                    central_angle = central_angle - np.pi
+                    if len(o) < pal_max_destinos:
+                        tam_pal = len(o)
+                        palabra = ' '*(pal_max_destinos - tam_pal)+o
+                        palabra = palabra+' '+' '*len(palabra)
+                    else:
+                        palabra = o
+                        palabra = palabra+' '+' '*len(palabra)
+
+                else:
+                    central_angle = (central_angle0*np.pi)/180
+                    if len(o) < pal_max_destinos:
+                        tam_pal = len(o)
+                        palabra = o+' '*(pal_max_destinos - tam_pal)
+                        palabra = ' '+' '*len(palabra)+palabra
+                    else:
+                        palabra = o
+                        palabra = ' '+' '*len(palabra)+palabra
+
+
+                ANGULOS.append(dif00)
+
+                ax.text(etiquetapos0000[0], etiquetapos0000[1], palabra, color = 'black', va = 'center', ha = 'center', 
+                        fontsize = target_letra.get(), rotation = np.rad2deg(central_angle), family = 'monospace', fontweight='bold')
+                #ax.scatter(etiquetapos33[0], etiquetapos33[1], s = 20, c = 'lime', zorder = 2)
+
+                if target_width.get() == 0:
+                    ancho2 = 10
+                if target_width.get() > 0:
+                    pass
+
+                if Counts_TARGET[o] == 1:
+                    t1 = dif11
+                    t2 = dif11+tam2
+                    sour2, mitad33, internopos = source2(radio = radio2, theta1 = t1, theta2 = t2,
+                                                         width = ancho2, sep = sepp2, color = 'white')
+                    ax.add_patch(sour2)
+                    nodos_des_1[o] = [sour2, mitad33, internopos]
+                    dif11 += (tam2+Espacio2)
+                else:
+                    t1 = dif11
+                    sectores = tam2/Counts_TARGET[o]
+                    ss0 = 0
+                    ss1 = sectores
+                    intersecciones_des = []
+                    for r in range(Counts_TARGET[o]):
+                        t1 = ss0+dif11
+                        t2 = ss1+dif11
+                        sour2, mitad33, internopos = source2(radio = radio2, theta1 = t1, theta2 = t2,
+                                                             width = ancho2, sep = sepp2, color = 'white')
+                        ax.add_patch(sour2)
+                        intersecciones_des.append([sour2, mitad33, internopos])
+                        ss1 += sectores
+                        ss0 += sectores
+                    nodos_des_1[o] = intersecciones_des
+                    dif11 += (tam2+Espacio2)
+
+                central_angle2 = (((dif00+tam2)-dif00)/2)+dif00
+                radian2 = (central_angle2*np.pi)/180
+                x2 = (radio2 * (1-((ancho2/2)/100))) *  np.cos(radian2)
+                y2 = (radio2 * (1-((ancho2/2)/100))) *  np.sin(radian2)
+                #ax.scatter(x2, y2, s = 10, c = 'black', zorder = 2)
+
+                dif00 += (tam2+Espacio2)
+
+            """
+            Conexiones ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+            """
+            #---------------
+            # parte 1
+            XX = []
+            for ori in origenes:
+                xu = 0
+                if Counts_SOURCE[ori] == 1:
+                    for SOURCE, TARGET in net:
+                        if ori == SOURCE:
+                            if Counts_TARGET[TARGET] == 1:  # target uno
+                                #print('>>>', SOURCE, TARGET)
+                                path_data = LOCATIONS(nodos_ori_0[SOURCE][1], nodos_des_1[TARGET][1])
+
+                                codes, verts = zip(*path_data)
+                                path = mpath.Path(verts, codes)
+                                patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[ori], alpha=1, lw = None, ec = 'none', zorder = 0)
+                                ax.add_patch(patch)
+                            else: # target con mas de uno
+                                XX.append([SOURCE, 'NA', TARGET])
+                else:
+                    for SOURCE, TARGET in net:
+                        if ori == SOURCE:
+                            #print(SOURCE, xu, TARGET)
+                            if Counts_TARGET[TARGET] == 1:
+                                #print(SOURCE, xu, TARGET, '----')
+                                path_data = LOCATIONS(nodos_ori_0[SOURCE][xu][1], nodos_des_1[TARGET][1])
+                                codes, verts = zip(*path_data)
+                                path = mpath.Path(verts, codes)
+                                patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[ori], alpha=1, lw = None, ec = 'none', zorder = 0)
+                                ax.add_patch(patch)
+                            else: # target con mas de uno
+                                XX.append([SOURCE, xu, TARGET])
+                            xu += 1
+
+            #---------------
+            # Parte 2
+            output = []
+            for SOURCE, P, TARGET in XX:
+                if TARGET not in output:
+                    output.append(TARGET)
+
+            for s in output:
+                n = 0
+                for SOURCE, P, TARGET in XX:
+                    if s == TARGET:
+                        if P == 'NA':
+                            path_data = LOCATIONS(nodos_ori_0[SOURCE][1], nodos_des_1[TARGET][n][1])
+
+                            codes, verts = zip(*path_data)
+                            path = mpath.Path(verts, codes)
+                            patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[SOURCE], alpha=1, lw = None, ec = 'none', zorder = 0)
+                            ax.add_patch(patch)
+                        else:
+                            path_data = LOCATIONS(nodos_ori_0[SOURCE][P][1], nodos_des_1[TARGET][n][1])
+
+                            codes, verts = zip(*path_data)
+                            path = mpath.Path(verts, codes)
+                            patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[SOURCE], alpha=1, lw = None, ec = 'none', zorder = 0)
+                            ax.add_patch(patch)
+                        n += 1 
+            if mostrar_vari.get() == 'True':
+                if target_width.get() > 3:
+                    for i, j in zip(nodos_des_0[destinos[0]], ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'OTA']):
+                        ax.text(np.sum(i[0][0][0]+i[1][0][0])/2, np.sum(i[0][0][1]+i[1][0][1])/2,
+                                ' '*len(j)+' '+j, color = 'black', ha = 'center',va = 'center',  
+                                fontsize = 7, rotation = ((continuacion+angulo_espacio)-90)-2, family = 'monospace')
+            if mostrar_vari.get() == 'False':
+                pass
+            ##
+            if mostrar_leyenda.get() == 'True':
+                yy = 1.7
+                for var in VaRiAbLeS:
+                    xx = -1.9
+                    for e, j in enumerate(VaRiAbLeS[var]):
+                        ax.scatter(xx, yy, s = leyenda_size.get(), c = VaRiAbLeS[var][j], marker = 's')
+                        xx +=0.07
+                    ax.text(xx, yy, var, ha = 'left', va = 'center', fontsize = leyenda_letra.get())
+                    yy -= 0.1
+            if mostrar_leyenda.get() == 'False':
+                pass
+
+            ax.text(-0.3, 1.9, title_kit, ha = 'center', va = 'center', fontsize = 15, weight = 'bold')
+
+            ax.set_xlim(-float(lim_xy.get()), float(lim_xy.get()))
+            ax.set_ylim(-float(lim_xy.get()), float(lim_xy.get()))
+            ax.axis('off')
+
+            plt.savefig('Plots16S/Chord_'+title_kit+'_'+data_i.value+'_'+Linaje.value+'_'+str(Percentage2.value)+'_'+datetime.datetime.now().strftime('%d.%B.%Y_%I-%M%p')+'.png', dpi = 900, bbox_inches= 'tight')
+            plt.close()
+        ###############
+        ###############
+
+
+        boton = Button(root, text="SVG", cursor="hand2",
+                    bg="gold", fg="black",font=("Arial", 8), command = on_select3)
+        boton.grid(column = 1, row = 22, sticky = 'WES')
+        #boton.bind('<Button-1>', on_select3)
+        #------------------------------------
+
+
+        group_aspect = LabelFrame(root, text = "Chords plot", font=("Arial", 10,  "bold"), height = 1)
+        group_aspect.grid(column=2, row=0, rowspan = 200, sticky= 'EN')
+        group_aspect.configure(background='white')
+
+        mpl.rcParams.update(mpl.rcParamsDefault)
+
+        fig = plt.figure(figsize=(7, 7))
+
+        bar1 = FigureCanvasTkAgg(fig, group_aspect)
+        bar1.draw()
+        bar1.get_tk_widget().grid(row=0, column = 0)#, rowspan=7, columnspan = 7
+
+
+        ax = fig.add_axes([0, 0, 1, 1])
+        ax.set_aspect('equal', 'box')
+
+        sources_label = 1.36
+        targets_label = 1.58
+
+        radio = float(radio_fuente[9])
+        sepp = 0.01
+        ancho = ancho_sources[7] # % del ancho
+        #tam = 5
+        Espacio = 0.5
+
+
+        constante = apertura[160] - len(origenes)
+        tam = constante / len(origenes) # 
+
+        W = tam * len(origenes)
+
+        Q = (Espacio * len(origenes)) - Espacio
+        sour_inicial = 360 - ((W + Q)/ 2)
+        #sour_inicial = 360 - 90
+
+        """
+        Nodos de Sources sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+        """
+        nodos_ori_0 = {}
+        dif0 = 360 - ((W + Q)/ 2)
+        dif1 = dif0 # inicio de los nodos
+        record_ori_0 = {}
+
+        for o in origenes:
+            teta1 = dif0
+            teta2 = dif0+tam
+
+            sour, mitad3, etiquetapos, mitad1 = source1(radio = radio, theta1 = teta1, theta2 = teta2,
+                                                     width = radio*(ancho/100), sep = sepp, color = CorrepondenciA[o])
+            ax.add_patch(sour)
+            record_ori_0[o] = [teta1, teta2]
+
+            central_angle0 = (((dif0+tam)-dif0)/2)+dif0
+            central_angle = (central_angle0*np.pi)/180
+            if etiquetapos[0] < 0:
+                central_angle = central_angle - np.pi
+                if len(o) < pal_max_origenes:
+                    tam_pal = len(o)
+                    palabra = ' '*(pal_max_origenes - tam_pal)+o
+                    palabra = palabra+' '*len(palabra)+' '
+                else:
+                    palabra = o
+                    palabra = palabra+' '*len(palabra)+' '
+            else:
+                central_angle = (central_angle0*np.pi)/180
+                if len(o) < pal_max_origenes:
+                    tam_pal = len(o)
+                    palabra = o+' '*(pal_max_origenes - tam_pal)
+                    palabra = ' '*len(palabra)+' '+palabra
+                else:
+                    palabra = o
+                    palabra = ' '*len(palabra)+' '+palabra
+
+
+            ax.text(etiquetapos[0], etiquetapos[1], palabra, color = 'black',
+                    va = 'center', ha = 'center', #fontweight = 'bold',
+                    fontsize = letra_source[7], rotation = np.rad2deg(central_angle),
+                    family = 'monospace', style='italic')
+            #ax.scatter(etiquetapos[0], etiquetapos[1], s = 50, c = 'black', zorder = 2)
+
+            if Counts_SOURCE[o] == 1:
+                t1 = dif1
+                t2 = dif1+tam
+                sour2, mitad33, internopos = source2(radio = radio, theta1 = t1, theta2 = t2,
+                                                     width = ancho, sep = sepp, color = 'white')
+                ax.add_patch(sour2)
+                nodos_ori_0[o] = [sour2, mitad33, internopos]
+                dif1 += (tam+Espacio)
+            else:
+                t1 = dif1
+                sectores = tam/Counts_SOURCE[o]
+                ss0 = 0
+                ss1 = sectores
+                intersecciones_ori = []
+                for r in range(Counts_SOURCE[o]):
+                    t1 = ss0+dif1
+                    t2 = ss1+dif1
+                    sour2, mitad33, internopos = source2(radio = radio, theta1 = t1, theta2 = t2,
+                                                         width = ancho, sep = sepp, color = 'white')
+
+                    ax.add_patch(sour2)
+                    intersecciones_ori.append([sour2, mitad33, internopos])
+
+                    ss1 += sectores
+                    ss0 += sectores
+                nodos_ori_0[o] = intersecciones_ori
+                dif1 += (tam+Espacio)
+
+            PER = 2
+            central_angle = (((dif0+tam)-dif0)/2)+dif0
+
+            dif0 += (tam+Espacio)
+
+        """
+        Nodos de Targets ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
+        """   
+        #----------
+        # angulo de separacion elegido
+
+        angulo_espacio = tamanos[55]
+
+        continuacion = dif0 - Espacio - 360
+        Espacio2 = 0.5
+
+        if angulo_espacio > 0:
+            dif00 = angulo_espacio + continuacion
+            tam2 = ((sour_inicial-angulo_espacio)-(continuacion+angulo_espacio) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+        else:
+            tam2 = ((sour_inicial-continuacion) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+            dif00 = continuacion
+
+        nodos_des_0 = {}
+
+        ANGULOS = []
+        nodos_des_1 = {}
+        #dif00 = continuacion
+        dif11 = dif00
+        #tam2 = ((sour_inicial-continuacion) - ((len(destinos) * Espacio2)-Espacio2))/len(destinos)
+
+        radio2 = float(radio_destino[9])
+
+        sepp2 = 0.01
+        ancho2 = ancho_targets[7]
+
+        radio3 = radio2+sepp2+(radio2*(ancho2/100))
+        radio4 = radio3+sepp2+(radio2*(ancho2/100))
+        radio5 = radio4+sepp2+(radio2*(ancho2/100))
+        radio6 = radio5+sepp2+(radio2*(ancho2/100))
+
+
+        for o in destinos:
+
+            teta11 = dif11
+            teta22 = dif11+tam2
+            sour, mitad2, etiquetapos, mitad1 = source1(radio = radio2, theta1 = teta11, theta2 = teta22,
+                                                     width = radio2*(ancho2/100), sep = sepp2, color = variedad[SamplE_variedad[o]])
+            ax.add_patch(sour)
+
+            #####
+            sour0, mitad22, etiquetapos0, mitad11 = source1(radio = radio3, theta1 = teta11, theta2 = teta22,
+                                                     width = radio2*(ancho2/100), sep = sepp2, color = procesado[SamplE_procesado[o]])
+            ax.add_patch(sour0)
+
+
+            sour00, mitad222, etiquetapos00, mitad111 = source1(radio = radio4, theta1 = teta11, theta2 = teta22,
+                                                     width = radio2*(ancho2/100), sep = sepp2, color = cultivo[SamplE_cultivo[o]])
+            ax.add_patch(sour00)
+
+            sour000, mitad2222, etiquetapos000, mitad1111 = source1(radio = radio5, theta1 = teta11, theta2 = teta22,
+                                                     width = radio2*(ancho2/100), sep = sepp2, color = tiempo_secado[SamplE_tiempo_secado[o]])
+            ax.add_patch(sour000)
+
+            sour0000, mitad22222, etiquetapos0000, mitad11111 = source1(radio = radio6, theta1 = teta11, theta2 = teta22,
+                                                     width = radio2*(ancho2/100), sep = sepp2, color = ota[SamplE_ota[o]])
+            ax.add_patch(sour0000)
+
+            if o == destinos[0]:
+                nodos_des_0[o] = [[mitad1, mitad2], [mitad11, mitad22],
+                                  [mitad111, mitad222], [mitad1111, mitad2222],
+                                  [mitad11111, mitad22222]]
+
+
+            #####
+            central_angle0 = (((dif00+tam2)-dif00)/2)+dif00
+            central_angle = (central_angle0*np.pi)/180
+
+
+            if etiquetapos[0] < 0:
+                central_angle = central_angle - np.pi
+                if len(o) < pal_max_destinos:
+                    tam_pal = len(o)
+                    palabra = ' '*(pal_max_destinos - tam_pal)+o
+                    palabra = palabra+' '+' '*len(palabra)
+                else:
+                    palabra = o
+                    palabra = palabra+' '+' '*len(palabra)
+
+            else:
+                central_angle = (central_angle0*np.pi)/180
+                if len(o) < pal_max_destinos:
+                    tam_pal = len(o)
+                    palabra = o+' '*(pal_max_destinos - tam_pal)
+                    palabra = ' '+' '*len(palabra)+palabra
+                else:
+                    palabra = o
+                    palabra = ' '+' '*len(palabra)+palabra
+
+
+            ANGULOS.append(dif00)
+            ax.text(etiquetapos0000[0], etiquetapos0000[1], palabra, color = 'black', va = 'center', ha = 'center', 
+                    fontsize = letra_target[7], rotation = np.rad2deg(central_angle), family = 'monospace', fontweight='bold')
+            #ax.scatter(etiquetapos33[0], etiquetapos33[1], s = 20, c = 'lime', zorder = 2)
+            if Counts_TARGET[o] == 1:
+                t1 = dif11
+                t2 = dif11+tam2
+                sour2, mitad33, internopos = source2(radio = radio2, theta1 = t1, theta2 = t2,
+                                                     width = ancho2, sep = sepp2, color = 'white')
+                ax.add_patch(sour2)
+                nodos_des_1[o] = [sour2, mitad33, internopos]
+                dif11 += (tam2+Espacio2)
+            else:
+                t1 = dif11
+                sectores = tam2/Counts_TARGET[o]
+                ss0 = 0
+                ss1 = sectores
+                intersecciones_des = []
+                for r in range(Counts_TARGET[o]):
+                    t1 = ss0+dif11
+                    t2 = ss1+dif11
+                    sour2, mitad33, internopos = source2(radio = radio2, theta1 = t1, theta2 = t2,
+                                                         width = ancho2, sep = sepp2, color = 'white')
+                    ax.add_patch(sour2)
+                    intersecciones_des.append([sour2, mitad33, internopos])
+                    ss1 += sectores
+                    ss0 += sectores
+                nodos_des_1[o] = intersecciones_des
+                dif11 += (tam2+Espacio2)
+
+            central_angle2 = (((dif00+tam2)-dif00)/2)+dif00
+            radian2 = (central_angle2*np.pi)/180
+            x2 = (radio2 * (1-((ancho2/2)/100))) *  np.cos(radian2)
+            y2 = (radio2 * (1-((ancho2/2)/100))) *  np.sin(radian2)
+            #ax.scatter(x2, y2, s = 10, c = 'black', zorder = 2)
+
+            dif00 += (tam2+Espacio2)
+
+        """
+        Conexiones ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        """
+        #---------------
+        # parte 1
+        XX = []
+        for ori in origenes:
+            xu = 0
+            if Counts_SOURCE[ori] == 1:
+                for SOURCE, TARGET in net:
+                    if ori == SOURCE:
+                        if Counts_TARGET[TARGET] == 1:  # target uno
+                            #print('>>>', SOURCE, TARGET)
+                            path_data = LOCATIONS(nodos_ori_0[SOURCE][1], nodos_des_1[TARGET][1])
+
+                            codes, verts = zip(*path_data)
+                            path = mpath.Path(verts, codes)
+                            patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[ori], alpha=1, lw = None, ec = 'none', zorder = 0)
+                            ax.add_patch(patch)
+                        else: # target con mas de uno
+                            XX.append([SOURCE, 'NA', TARGET])
+            else:
+                for SOURCE, TARGET in net:
+                    if ori == SOURCE:
+                        #print(SOURCE, xu, TARGET)
+                        if Counts_TARGET[TARGET] == 1:
+                            #print(SOURCE, xu, TARGET, '----')
+                            path_data = LOCATIONS(nodos_ori_0[SOURCE][xu][1], nodos_des_1[TARGET][1])
+                            codes, verts = zip(*path_data)
+                            path = mpath.Path(verts, codes)
+                            patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[ori], alpha=1, lw = None, ec = 'none', zorder = 0)
+                            ax.add_patch(patch)
+                        else: # target con mas de uno
+                            XX.append([SOURCE, xu, TARGET])
+                        xu += 1
+
+        #---------------
+        # Parte 2
+        output = []
+        for SOURCE, P, TARGET in XX:
+            if TARGET not in output:
+                output.append(TARGET)
+
+        for s in output:
+            n = 0
+            for SOURCE, P, TARGET in XX:
+                if s == TARGET:
+                    if P == 'NA':
+                        path_data = LOCATIONS(nodos_ori_0[SOURCE][1], nodos_des_1[TARGET][n][1])
+
+                        codes, verts = zip(*path_data)
+                        path = mpath.Path(verts, codes)
+                        patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[SOURCE], alpha=1, lw = None, ec = 'none', zorder = 0)
+                        ax.add_patch(patch)
+                    else:
+                        path_data = LOCATIONS(nodos_ori_0[SOURCE][P][1], nodos_des_1[TARGET][n][1])
+
+                        codes, verts = zip(*path_data)
+                        path = mpath.Path(verts, codes)
+                        patch = mpatches.PathPatch(path, facecolor=CorrepondenciA[SOURCE], alpha=1, lw = None, ec = 'none', zorder = 0)
+                        ax.add_patch(patch)
+                    n += 1 
+
+        for i, j in zip(nodos_des_0[destinos[0]], ['Coffee_Variety', 'Processing', 'Cultivation', 'Time_Dry', 'OTA']):
+            ax.text(np.sum(i[0][0][0]+i[1][0][0])/2, np.sum(i[0][0][1]+i[1][0][1])/2,
+                    ' '*len(j)+' '+j, color = 'black', ha = 'center',va = 'center',  
+                    fontsize = 7, rotation = ((continuacion+angulo_espacio)-90)-2, family = 'monospace')
+        ##
+        yy = 1.7
+        for var in VaRiAbLeS:
+            xx = -1.9
+            for e, j in enumerate(VaRiAbLeS[var]):
+                ax.scatter(xx, yy, s = 35, c = VaRiAbLeS[var][j], marker = 's')
+                xx +=0.07
+            ax.text(xx, yy, var, ha = 'left', va = 'center', fontsize = 8)
+            yy -= 0.1
+        #
+        ax.text(-0.3, 1.9, title_kit, ha = 'center', va = 'center', fontsize = 15, weight = 'bold')
+
+
+        ax.set_xlim(-float(limites[0]), float(limites[0]))
+        ax.set_ylim(-float(limites[0]), float(limites[0]))
+        ax.axis('off')
+
+        plt.close()
+
+
+        root.mainloop()
+
+
+bot_chord = widgets.Button(description='Chord', layout=Layout(width='80px', height='25px'))
+bot_chord.style.button_color = 'tan'
+outbot000 = widgets.Output()
+
+def button_bot_chord(b):
+    with outbot000:
+        clear_output(True)
+        chord_plot(title_kit = selectkit_i.value)
+
+bot_chord.on_click(button_bot_chord)
+
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 TAXONOMI_IND = VBox([
     #negra,
       Box([HBox([VBox([widgets.Label('Tax Level:'), VBox([Linaje, OUT11])]),
@@ -2411,7 +4149,7 @@ TAXONOMI_IND = VBox([
                  VBox([widgets.Label('Orientarion:'), hor_ver_i]),
                  VBox([widgets.Label('Stacked Color:'), VBox([Rampas2, OUTboxrampas2])]),
                  VBox([widgets.Label('Explore Samples:'),
-     Box(children=[HBox([VBox([HBox([Sample_Select, samselOUT]), HBox([widgets.Label('Kit:'), selectkit_i])])])], layout= Layout(border='1px solid pink', width='200px', height='73px'))])             
+     Box(children=[HBox([VBox([HBox([Sample_Select, samselOUT]), HBox([widgets.Label('Kit:'), selectkit_i, bot_chord])])])], layout= Layout(border='1px solid pink', width='200px', height='73px'))])             
                 ])],
           
       layout = Layout(border='1px solid silver', width='950px')),
