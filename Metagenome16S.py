@@ -2472,7 +2472,7 @@ def LOCATIONS(source, target):
 from tkinter import ttk
 
 def chord_plot(title_kit = ''):
-    if title_kit in ['No_Kit', 'Both']:
+    if title_kit == 'Both':
         pass 
     else:
         
@@ -2912,20 +2912,25 @@ def chord_plot(title_kit = ''):
                 pass
             ##
             if mostrar_leyenda.get() == 'True':
-                yy = 1.7
+                ##
+                yy = 2
+                xx = -2.4
                 for var in VaRiAbLeS:
-                    xx = -1.9
+                    ax.text(xx-0.03, yy, var, ha = 'left', va = 'center', fontsize = leyenda_letra.get(), weight = 'bold')
+                    yy -= 0.07
                     for e, j in enumerate(VaRiAbLeS[var]):
-                        ax.scatter(xx, yy, s = leyenda_size.get(), c = VaRiAbLeS[var][j], marker = 's')
-                        xx +=0.07
-                    ax.text(xx, yy, var, ha = 'left', va = 'center', fontsize = leyenda_letra.get())
-                    yy -= 0.1
+                        ax.scatter(xx, yy, s = leyenda_size.get(), c = VaRiAbLeS[var][j], marker = 'o')
+                        ax.text(xx, yy, '  '+j, ha = 'left', va = 'center', fontsize = leyenda_letra.get(), rotation = 0)
+                        #xx +=0.07
+                        yy -= 0.07
+                    yy -= 0.05
+                #
             if mostrar_leyenda.get() == 'False':
                 pass
 
             ax.text(-0.3, 1.9, title_kit, ha = 'center', va = 'center', fontsize = 15, weight = 'bold')
 
-            ax.set_xlim(-float(lim_xy.get()), float(lim_xy.get()))
+            ax.set_xlim(-float(lim_xy.get())-0.5, float(lim_xy.get()))
             ax.set_ylim(-float(lim_xy.get()), float(lim_xy.get()))
             ax.axis('off')
 
@@ -2961,7 +2966,7 @@ def chord_plot(title_kit = ''):
         #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         cero1 = Label(root, text='Source opening', font=("Arial", 8), fg = 'white', bg = 'darkblue')
         cero1.grid(column=0, row=4, sticky = 'WES')
-        apertura = list(range(20,181))
+        apertura = list(range(20,221))
         opening_source = IntVar()
         abertura = ttk.Combobox(root, textvariable = opening_source, font=("Arial", 8),
                              values = apertura, width=8)
@@ -3463,20 +3468,25 @@ def chord_plot(title_kit = ''):
                 pass
             ##
             if mostrar_leyenda.get() == 'True':
-                yy = 1.7
+                ##
+                yy = 2
+                xx = -2.4
                 for var in VaRiAbLeS:
-                    xx = -1.9
+                    ax.text(xx-0.03, yy, var, ha = 'left', va = 'center', fontsize = leyenda_letra.get(), weight = 'bold')
+                    yy -= 0.07
                     for e, j in enumerate(VaRiAbLeS[var]):
-                        ax.scatter(xx, yy, s = leyenda_size.get(), c = VaRiAbLeS[var][j], marker = 's')
-                        xx +=0.07
-                    ax.text(xx, yy, var, ha = 'left', va = 'center', fontsize = leyenda_letra.get())
-                    yy -= 0.1
+                        ax.scatter(xx, yy, s = leyenda_size.get(), c = VaRiAbLeS[var][j], marker = 'o')
+                        ax.text(xx, yy, '  '+j, ha = 'left', va = 'center', fontsize = leyenda_letra.get(), rotation = 0)
+                        #xx +=0.07
+                        yy -= 0.07
+                    yy -= 0.05
+                #
             if mostrar_leyenda.get() == 'False':
                 pass
 
             ax.text(-0.3, 1.9, title_kit, ha = 'center', va = 'center', fontsize = 15, weight = 'bold')
 
-            ax.set_xlim(-float(lim_xy.get()), float(lim_xy.get()))
+            ax.set_xlim(-float(lim_xy.get())-0.5, float(lim_xy.get()))
             ax.set_ylim(-float(lim_xy.get()), float(lim_xy.get()))
             ax.axis('off')
 
@@ -3826,20 +3836,25 @@ def chord_plot(title_kit = ''):
                 pass
             ##
             if mostrar_leyenda.get() == 'True':
-                yy = 1.7
+                ##
+                yy = 2
+                xx = -2.4
                 for var in VaRiAbLeS:
-                    xx = -1.9
+                    ax.text(xx-0.03, yy, var, ha = 'left', va = 'center', fontsize = leyenda_letra.get(), weight = 'bold')
+                    yy -= 0.07
                     for e, j in enumerate(VaRiAbLeS[var]):
-                        ax.scatter(xx, yy, s = leyenda_size.get(), c = VaRiAbLeS[var][j], marker = 's')
-                        xx +=0.07
-                    ax.text(xx, yy, var, ha = 'left', va = 'center', fontsize = leyenda_letra.get())
-                    yy -= 0.1
+                        ax.scatter(xx, yy, s = leyenda_size.get(), c = VaRiAbLeS[var][j], marker = 'o')
+                        ax.text(xx, yy, '  '+j, ha = 'left', va = 'center', fontsize = leyenda_letra.get(), rotation = 0)
+                        #xx +=0.07
+                        yy -= 0.07
+                    yy -= 0.05
+                #
             if mostrar_leyenda.get() == 'False':
                 pass
 
             ax.text(-0.3, 1.9, title_kit, ha = 'center', va = 'center', fontsize = 15, weight = 'bold')
 
-            ax.set_xlim(-float(lim_xy.get()), float(lim_xy.get()))
+            ax.set_xlim(-float(lim_xy.get())-0.5, float(lim_xy.get()))
             ax.set_ylim(-float(lim_xy.get()), float(lim_xy.get()))
             ax.axis('off')
 
@@ -3856,7 +3871,7 @@ def chord_plot(title_kit = ''):
         #------------------------------------
 
 
-        group_aspect = LabelFrame(root, text = "Chords plot", font=("Arial", 10,  "bold"), height = 1)
+        group_aspect = LabelFrame(root, text = "Chord plot", font=("Arial", 10,  "bold"), height = 5)
         group_aspect.grid(column=2, row=0, rowspan = 200, sticky= 'EN')
         group_aspect.configure(background='white')
 
@@ -4170,19 +4185,22 @@ def chord_plot(title_kit = ''):
                     ' '*len(j)+' '+j, color = 'black', ha = 'center',va = 'center',  
                     fontsize = 7, rotation = ((continuacion+angulo_espacio)-90)-2, family = 'monospace')
         ##
-        yy = 1.7
+        yy = 2
+        xx = -2.4
         for var in VaRiAbLeS:
-            xx = -1.9
+            ax.text(xx-0.03, yy, var, ha = 'left', va = 'center', fontsize = 8, weight = 'bold')
+            yy -= 0.07
             for e, j in enumerate(VaRiAbLeS[var]):
-                ax.scatter(xx, yy, s = 35, c = VaRiAbLeS[var][j], marker = 's')
-                xx +=0.07
-            ax.text(xx, yy, var, ha = 'left', va = 'center', fontsize = 8)
-            yy -= 0.1
+                ax.scatter(xx, yy, s = 35, c = VaRiAbLeS[var][j], marker = 'o')
+                ax.text(xx, yy, '  '+j, ha = 'left', va = 'center', fontsize = 8, rotation = 0)
+                #xx +=0.07
+                yy -= 0.07
+            yy -= 0.05
         #
-        ax.text(-0.3, 1.9, title_kit, ha = 'center', va = 'center', fontsize = 15, weight = 'bold')
+        ax.text(-0.35, 1.9, title_kit, ha = 'center', va = 'center', fontsize = 15, weight = 'bold')
 
 
-        ax.set_xlim(-float(limites[0]), float(limites[0]))
+        ax.set_xlim(-float(limites[0])-0.5, float(limites[0]))
         ax.set_ylim(-float(limites[0]), float(limites[0]))
         ax.axis('off')
 
@@ -4190,6 +4208,8 @@ def chord_plot(title_kit = ''):
 
 
         root.mainloop()
+
+
 
 
 bot_chord = widgets.Button(description='Chord', layout=Layout(width='80px', height='25px'))
