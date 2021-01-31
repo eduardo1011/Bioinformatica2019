@@ -487,7 +487,7 @@ for v in ['Coffee_Variety','Processing','Cultivation','Time_Dry','OTA']:
     fig.update_yaxes(showgrid=False, zeroline=False, row = 3, col = columnas, showticklabels=False)
     columnas += 1
 #
-muestra_sel = '23A15'
+muestra_sel = '1R0'
 df = especies_por_muestra_asv[muestra_sel]
 df2 = df[df[muestra_sel] >= umbral]
 pasa = len(df2)
