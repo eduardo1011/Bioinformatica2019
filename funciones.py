@@ -55,7 +55,7 @@ from urllib.request import urlopen
 import re
 from pandas import DataFrame
 import pandas as pd
-from pandas.compat import StringIO
+from io import StringIO
 import warnings
 warnings.filterwarnings("ignore")
 import numpy as np
